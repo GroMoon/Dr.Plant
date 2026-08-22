@@ -1,24 +1,32 @@
 [gd_scene format=3 uid="uid://duanxqxdvopbl"]
 
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_st0ij"]
+load_path = "res://.godot/imported/test.png-2b0b935732229e5bd5e655f2644b2498.ctex"
+
 [node name="Node2D" type="Control" unique_id=1582054001]
 layout_mode = 3
 anchors_preset = 0
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1300273301]
 layout_mode = 0
-offset_right = 1151.0
-offset_bottom = 650.0
+offset_right = 1143.0
+offset_bottom = 641.0
+texture = SubResource("CompressedTexture2D_st0ij")
+expand_mode = 1
 
 [node name="Button" type="Button" parent="TextureRect" unique_id=2049842639]
 layout_mode = 0
-offset_left = 209.0
-offset_top = 84.0
-offset_right = 261.0
-offset_bottom = 114.0
+offset_left = 503.0
+offset_top = 269.0
+offset_right = 613.0
+offset_bottom = 401.0
+theme_override_font_sizes/font_size = 26
+text = "시작하기"
 
-[node name="Button" type="Button" parent="TextureRect/Button" unique_id=1090680389]
+[node name="Button2" type="Button" parent="TextureRect" unique_id=1090680389]
 layout_mode = 0
-offset_left = 5.0
-offset_top = 61.0
-offset_right = 57.0
-offset_bottom = 91.0
+offset_left = 513.0
+offset_top = 413.0
+offset_right = 604.0
+offset_bottom = 479.0
+text = "종료"
