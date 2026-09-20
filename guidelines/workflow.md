@@ -2,8 +2,7 @@
 
 ## Godot 작업
 
-- Godot 조작은 godot MCP 도구를 사용한다. `projectPath`는 항상 저장소 루트의 `DoctorPlant` 폴더
-  (`C:\Users\MoonS\Desktop\Dr.Plant\DoctorPlant`).
+- Godot 조작은 godot MCP 도구를 사용한다.
 - 씬/노드 편집은 헤드리스 도구(`add_node`, `set_node_properties` 등)로 한다. 에디터 GUI는 사용자가 직접 확인할 때만 연다.
 - **에디터가 켜져 있으면 파일 잠금이 걸려 이름 변경·삭제가 실패한다.** 그런 작업 전에는 에디터를 닫도록 알린다.
 - GDScript는 파일로 작성한 뒤 `validate`로 검증하고 `attach_script`로 붙인다.
@@ -12,8 +11,6 @@
 ## 커밋
 
 - 커밋·푸시는 요청받았을 때만 한다.
-- 현재 브랜치는 `test`, 원격은 `origin` (develop / main / test).
-- 요구사항 ID가 있으면 커밋 메시지에 붙인다: `REQ-PLANT-001 식물 성장 단계 구현`
 
 ## 보고
 
