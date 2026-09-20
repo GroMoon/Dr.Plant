@@ -1,0 +1,62 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/pause_menu.gd" id="1_pause"]
+[ext_resource type="PackedScene" path="res://scenes/settings_menu.tscn" id="2_settings"]
+[ext_resource type="PackedScene" path="res://scenes/confirm_popup.tscn" id="3_confirm"]
+
+[node name="PauseMenu" type="CanvasLayer"]
+process_mode = 3
+layer = 64
+script = ExtResource("1_pause")
+
+[node name="Root" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Root"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="Center" type="CenterContainer" parent="Root"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root/Center"]
+custom_minimum_size = Vector2(420, 0)
+
+[node name="Box" type="VBoxContainer" parent="Root/Center/Panel"]
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Root/Center/Panel/Box"]
+theme_override_font_sizes/font_size = 30
+text = "PAUSE_TITLE"
+horizontal_alignment = 1
+
+[node name="TitleRule" type="HSeparator" parent="Root/Center/Panel/Box"]
+
+[node name="ResumeButton" type="Button" parent="Root/Center/Panel/Box"]
+custom_minimum_size = Vector2(0, 52)
+text = "MENU_RESUME"
+
+[node name="SettingsButton" type="Button" parent="Root/Center/Panel/Box"]
+custom_minimum_size = Vector2(0, 52)
+text = "MENU_SETTINGS"
+
+[node name="QuitButton" type="Button" parent="Root/Center/Panel/Box"]
+custom_minimum_size = Vector2(0, 52)
+text = "MENU_QUIT"
+
+[node name="SettingsMenu" parent="." instance=ExtResource("2_settings")]
+visible = false
+
+[node name="ConfirmPopup" parent="." instance=ExtResource("3_confirm")]
+visible = false

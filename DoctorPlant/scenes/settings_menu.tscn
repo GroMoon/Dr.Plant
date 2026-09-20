@@ -1,0 +1,170 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/settings_menu.gd" id="1_settings"]
+[ext_resource type="Script" path="res://scripts/ui/dialogue_label.gd" id="2_dialogue"]
+
+[node name="SettingsMenu" type="Control"]
+process_mode = 3
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(880, 0)
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel"]
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Center/Panel/Box"]
+theme_override_font_sizes/font_size = 34
+text = "SETTINGS_TITLE"
+
+[node name="TitleRule" type="HSeparator" parent="Center/Panel/Box"]
+
+[node name="Grid" type="GridContainer" parent="Center/Panel/Box"]
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 14
+columns = 3
+
+[node name="BgmLabel" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(220, 0)
+text = "SETTINGS_BGM"
+vertical_alignment = 1
+
+[node name="BgmSlider" type="HSlider" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(440, 26)
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+
+[node name="BgmValue" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(80, 0)
+text = "80%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SfxLabel" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(220, 0)
+text = "SETTINGS_SFX"
+vertical_alignment = 1
+
+[node name="SfxSlider" type="HSlider" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(440, 26)
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+
+[node name="SfxValue" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(80, 0)
+text = "80%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="WindowModeLabel" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(220, 0)
+text = "SETTINGS_WINDOW_MODE"
+vertical_alignment = 1
+
+[node name="WindowModeOption" type="OptionButton" parent="Center/Panel/Box/Grid"]
+size_flags_horizontal = 3
+
+[node name="WindowModeSpacer" type="Control" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(80, 0)
+mouse_filter = 2
+
+[node name="ResolutionLabel" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(220, 0)
+text = "SETTINGS_RESOLUTION"
+vertical_alignment = 1
+
+[node name="ResolutionOption" type="OptionButton" parent="Center/Panel/Box/Grid"]
+size_flags_horizontal = 3
+
+[node name="ResolutionSpacer" type="Control" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(80, 0)
+mouse_filter = 2
+
+[node name="LanguageLabel" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(220, 0)
+text = "SETTINGS_LANGUAGE"
+vertical_alignment = 1
+
+[node name="LanguageOption" type="OptionButton" parent="Center/Panel/Box/Grid"]
+size_flags_horizontal = 3
+
+[node name="LanguageSpacer" type="Control" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(80, 0)
+mouse_filter = 2
+
+[node name="TextSpeedLabel" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(220, 0)
+text = "SETTINGS_TEXT_SPEED"
+vertical_alignment = 1
+
+[node name="TextSpeedSlider" type="HSlider" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(440, 26)
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 5.0
+max_value = 120.0
+step = 5.0
+
+[node name="TextSpeedValue" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(80, 0)
+text = "40"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TextSizeLabel" type="Label" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(220, 0)
+text = "SETTINGS_TEXT_SIZE"
+vertical_alignment = 1
+
+[node name="TextSizeOption" type="OptionButton" parent="Center/Panel/Box/Grid"]
+size_flags_horizontal = 3
+
+[node name="TextSizeSpacer" type="Control" parent="Center/Panel/Box/Grid"]
+custom_minimum_size = Vector2(80, 0)
+mouse_filter = 2
+
+[node name="PreviewLabel" type="Label" parent="Center/Panel/Box"]
+text = "SETTINGS_PREVIEW"
+theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 1)
+
+[node name="PreviewBox" type="PanelContainer" parent="Center/Panel/Box"]
+custom_minimum_size = Vector2(0, 120)
+
+[node name="Preview" type="Label" parent="Center/Panel/Box/PreviewBox"]
+autowrap_mode = 3
+vertical_alignment = 1
+script = ExtResource("2_dialogue")
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Panel/Box"]
+alignment = 2
+theme_override_constants/separation = 14
+
+[node name="ResetButton" type="Button" parent="Center/Panel/Box/Buttons"]
+text = "SETTINGS_RESET"
+
+[node name="CloseButton" type="Button" parent="Center/Panel/Box/Buttons"]
+custom_minimum_size = Vector2(140, 0)
+text = "MENU_CLOSE"

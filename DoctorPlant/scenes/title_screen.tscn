@@ -1,0 +1,130 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/title_screen.gd" id="1_title"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/bg_title.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/bg_title-dark.png" id="3_bg_dark"]
+[ext_resource type="PackedScene" path="res://scenes/save_slot_menu.tscn" id="4_slots"]
+[ext_resource type="PackedScene" path="res://scenes/settings_menu.tscn" id="5_settings"]
+[ext_resource type="PackedScene" path="res://scenes/confirm_popup.tscn" id="6_confirm"]
+
+[sub_resource type="Gradient" id="Gradient_vignette"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0, 0, 0, 0, 0.0117647, 0.027451, 0.0196078, 0.85)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_vignette"]
+gradient = SubResource("Gradient_vignette")
+width = 32
+height = 256
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
+
+[node name="TitleScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_title")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackgroundDark" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_bg_dark")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Vignette" type="TextureRect" parent="."]
+anchor_top = 0.35
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_vignette")
+expand_mode = 1
+
+[node name="TitleBox" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -420.0
+offset_top = 96.0
+offset_right = 420.0
+offset_bottom = 260.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="TitleBox"]
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 84
+text = "GAME_TITLE"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="TitleBox"]
+theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 0.85)
+theme_override_font_sizes/font_size = 22
+text = "DOCTOR PLANT"
+horizontal_alignment = 1
+
+[node name="Menu" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -190.0
+offset_top = -320.0
+offset_right = 190.0
+offset_bottom = -96.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 14
+
+[node name="StartButton" type="Button" parent="Menu"]
+custom_minimum_size = Vector2(0, 56)
+text = "MENU_START"
+
+[node name="SettingsButton" type="Button" parent="Menu"]
+custom_minimum_size = Vector2(0, 56)
+text = "MENU_SETTINGS"
+
+[node name="QuitButton" type="Button" parent="Menu"]
+custom_minimum_size = Vector2(0, 56)
+text = "MENU_QUIT"
+
+[node name="VersionLabel" type="Label" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -52.0
+offset_right = -28.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.55)
+theme_override_font_sizes/font_size = 16
+text = "v0.1"
+horizontal_alignment = 2
+
+[node name="SaveSlotMenu" parent="." instance=ExtResource("4_slots")]
+visible = false
+
+[node name="SettingsMenu" parent="." instance=ExtResource("5_settings")]
+visible = false
+
+[node name="ConfirmPopup" parent="." instance=ExtResource("6_confirm")]
+visible = false

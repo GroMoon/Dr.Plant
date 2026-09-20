@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/loading_screen.gd" id="1_loading"]
+
+[node name="LoadingScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_loading")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.031, 0.047, 0.039, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Box" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(440, 0)
+theme_override_constants/separation = 18
+
+[node name="Message" type="Label" parent="Center/Box"]
+text = "LOADING"
+horizontal_alignment = 1
+
+[node name="Progress" type="ProgressBar" parent="Center/Box"]
+custom_minimum_size = Vector2(0, 12)
+max_value = 1.0
+step = 0.001
+show_percentage = false

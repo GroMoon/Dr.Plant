@@ -1,0 +1,81 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/chapter_stub.gd" id="1_stub"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/bg_title-dark.png" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/ui/dialogue_label.gd" id="3_dialogue"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="4_pause"]
+
+[node name="ChapterStub" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_stub")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Header" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+offset_left = 64.0
+offset_top = 48.0
+offset_right = -64.0
+offset_bottom = 160.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="Header"]
+theme_override_font_sizes/font_size = 34
+text = "STUB_TITLE"
+
+[node name="NoticeLabel" type="Label" parent="Header"]
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.7)
+theme_override_font_sizes/font_size = 18
+text = "STUB_NOTICE"
+
+[node name="HintLabel" type="Label" parent="Header"]
+theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 0.8)
+theme_override_font_sizes/font_size = 18
+text = "STUB_HINT"
+
+[node name="DialogueBox" type="PanelContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 96.0
+offset_top = -300.0
+offset_right = -96.0
+offset_bottom = -72.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Dialogue" type="Label" parent="DialogueBox"]
+autowrap_mode = 3
+script = ExtResource("3_dialogue")
+
+[node name="PauseMenu" parent="." instance=ExtResource("4_pause")]
+
+[node name="ProgressHint" type="Label" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -56.0
+offset_right = -104.0
+offset_bottom = -28.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.6)
+theme_override_font_sizes/font_size = 16
+text = "1 / 3"
+horizontal_alignment = 2
