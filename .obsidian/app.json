@@ -1,0 +1,11 @@
+{
+  "userIgnoreFilters": [
+    "DoctorPlant/"
+  ],
+  "attachmentFolderPath": "docs/attachments",
+  "useMarkdownLinks": true,
+  "newLinkFormat": "relative",
+  "alwaysUpdateLinks": true,
+  "showUnsupportedFiles": false,
+  "showLineNumber": true
+}
