@@ -10,6 +10,10 @@ const SETTINGS_PATH: String = "user://settings.cfg"
 
 enum WindowMode { WINDOWED, BORDERLESS, EXCLUSIVE }
 
+## 창 크기 후보. 렌더 해상도는 project.godot 의 1920x1080 으로 고정이고
+## 화면 비율도 16:9 로 고정이라(stretch: canvas_items / keep),
+## 이 값은 "창을 얼마나 크게 띄울지"만 결정한다.
+## 모니터보다 큰 값은 목록에서 빠진다(창이 화면 밖으로 나가는 것을 막는다).
 const RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(1280, 720),
 	Vector2i(1600, 900),
@@ -44,6 +48,7 @@ var text_size_index: int = DEFAULTS["text_size_index"]
 
 func _ready() -> void:
 	load_settings()
+	_clamp_resolution_to_screen()
 	apply_all()
 
 
@@ -53,6 +58,46 @@ func text_size() -> int:
 
 func resolution() -> Vector2i:
 	return RESOLUTIONS[clampi(resolution_index, 0, RESOLUTIONS.size() - 1)]
+
+
+## 지금 쓰는 모니터 크기.
+func screen_size() -> Vector2i:
+	if DisplayServer.get_name() == "headless":
+		return Vector2i(1920, 1080)
+	return DisplayServer.screen_get_size(DisplayServer.window_get_current_screen())
+
+
+## 창을 띄울 수 있는 영역(작업 표시줄 제외).
+func usable_screen_rect() -> Rect2i:
+	if DisplayServer.get_name() == "headless":
+		return Rect2i(0, 0, 1920, 1080)
+	return DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
+
+
+## 지금 모니터에 들어가는 창 크기인지. 가장 작은 값은 항상 남겨 둔다.
+func is_resolution_available(index: int) -> bool:
+	if index == 0:
+		return true
+	var size: Vector2i = RESOLUTIONS[clampi(index, 0, RESOLUTIONS.size() - 1)]
+	var screen: Vector2i = screen_size()
+	return size.x <= screen.x and size.y <= screen.y
+
+
+## 목록에 띄울 창 크기들.
+func available_resolution_indices() -> PackedInt32Array:
+	var indices := PackedInt32Array()
+	for i: int in RESOLUTIONS.size():
+		if is_resolution_available(i):
+			indices.append(i)
+	return indices
+
+
+## 저장된 값이 지금 모니터에 안 맞으면 들어가는 것 중 가장 큰 값으로 낮춘다.
+func _clamp_resolution_to_screen() -> void:
+	if is_resolution_available(resolution_index):
+		return
+	var indices: PackedInt32Array = available_resolution_indices()
+	resolution_index = indices[indices.size() - 1] if indices.size() > 0 else 0
 
 
 func is_text_instant() -> bool:
@@ -100,12 +145,13 @@ func apply_display() -> void:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 		_:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			_clamp_resolution_to_screen()
 			var size: Vector2i = resolution()
 			DisplayServer.window_set_size(size)
-			var screen: int = DisplayServer.window_get_current_screen()
-			var usable: Rect2i = DisplayServer.screen_get_usable_rect(screen)
+			var usable: Rect2i = usable_screen_rect()
 			var offset := Vector2i((Vector2(usable.size) - Vector2(size)) * 0.5)
-			DisplayServer.window_set_position(usable.position + offset)
+			# 창이 화면보다 크면 offset 이 음수가 되어 제목 표시줄이 화면 밖으로 나간다.
+			DisplayServer.window_set_position(usable.position + offset.max(Vector2i.ZERO))
 
 
 func apply_locale() -> void:
@@ -141,6 +187,7 @@ func set_window_mode(mode: int) -> void:
 
 func set_resolution_index(index: int) -> void:
 	resolution_index = clampi(index, 0, RESOLUTIONS.size() - 1)
+	_clamp_resolution_to_screen()
 	apply_display()
 	settings_changed.emit()
 

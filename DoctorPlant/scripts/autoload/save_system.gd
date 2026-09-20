@@ -41,8 +41,10 @@ func create_slot(slot: int) -> Dictionary:
 	var data: Dictionary = {
 		"version": SAVE_VERSION,
 		"chapter": 1,
-		"scene": "res://scenes/chapter_stub.tscn",
+		"scene": "res://scenes/ch1/ep1.tscn",
 		"playtime": 0.0,
+		"checkpoint": "",
+		"flags": {},
 		"saved_at": Time.get_datetime_string_from_system(false, true),
 	}
 	write_slot(slot, data)

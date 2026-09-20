@@ -1,0 +1,127 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/story/episode_player.gd" id="1_episode"]
+[ext_resource type="Script" path="res://scripts/story/ep1_script.gd" id="2_data"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogue_box.tscn" id="3_dialogue"]
+[ext_resource type="PackedScene" path="res://scenes/ui/choice_box.tscn" id="4_choice"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="5_pause"]
+
+[node name="Ep1" type="Node2D"]
+script = ExtResource("1_episode")
+script_data = ExtResource("2_data")
+scene_path = "res://scenes/ch1/ep1.tscn"
+chapter = 1
+next_scene = "res://scenes/test/test_doctor_sprite.tscn"
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Camera" type="Camera2D" parent="World"]
+position = Vector2(600, 450)
+zoom = Vector2(1.6, 1.6)
+
+[node name="ViewLayer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="FadeLayer" type="CanvasLayer" parent="."]
+layer = 8
+
+[node name="Fade" type="ColorRect" parent="FadeLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Ui" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="DialogueBox" parent="Ui" instance=ExtResource("3_dialogue")]
+visible = false
+
+[node name="ChoiceBox" parent="Ui" instance=ExtResource("4_choice")]
+visible = false
+
+[node name="InteractPrompt" type="Label" parent="Ui"]
+visible = false
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -128.0
+offset_right = 360.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.949, 0.784, 0.95)
+theme_override_font_sizes/font_size = 24
+text = "FIELD_INTERACT_HINT"
+horizontal_alignment = 1
+
+[node name="FieldHint" type="Label" parent="Ui"]
+visible = false
+anchor_right = 1.0
+offset_left = 64.0
+offset_top = 48.0
+offset_right = -64.0
+offset_bottom = 136.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.85)
+theme_override_font_sizes/font_size = 20
+text = "FIELD_MOVE_HINT"
+
+[node name="Card" type="Control" parent="Ui"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Backdrop" type="ColorRect" parent="Ui/Card"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Rows" type="VBoxContainer" parent="Ui/Card"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.0
+offset_top = -120.0
+offset_right = 480.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 18
+
+[node name="CardLabel" type="Label" parent="Ui/Card/Rows"]
+theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 0.9)
+theme_override_font_sizes/font_size = 26
+text = "EP1_CHAPTER_LABEL"
+horizontal_alignment = 1
+
+[node name="CardTitle" type="Label" parent="Ui/Card/Rows"]
+theme_override_font_sizes/font_size = 56
+text = "EP1_CHAPTER_TITLE"
+horizontal_alignment = 1
+
+[node name="CardSub" type="Label" parent="Ui/Card/Rows"]
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.75)
+theme_override_font_sizes/font_size = 22
+text = "EP1_EPISODE_LABEL"
+horizontal_alignment = 1
+
+[node name="MinigameLayer" type="CanvasLayer" parent="."]
+layer = 15
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]

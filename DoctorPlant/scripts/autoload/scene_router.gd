@@ -47,6 +47,13 @@ func change_scene(path: String) -> void:
 
 func _process(delta: float) -> void:
 	_elapsed += delta
+	# 교체가 끝났으면 로딩 상태를 다시 묻지 않는다.
+	# load_threaded_get 으로 이미 꺼내간 요청이라 INVALID_RESOURCE 가 돌아온다.
+	if _swapped:
+		if _elapsed >= MIN_SHOW_TIME:
+			_finish()
+		return
+
 	var progress: Array = []
 	var status: int = ResourceLoader.load_threaded_get_status(_target_path, progress)
 	if not progress.is_empty():
@@ -59,11 +66,6 @@ func _process(delta: float) -> void:
 			push_error("씬 로딩 실패: %s" % _target_path)
 			_finish()
 			return
-
-	if _swapped:
-		if _elapsed >= MIN_SHOW_TIME:
-			_finish()
-		return
 
 	var packed := ResourceLoader.load_threaded_get(_target_path) as PackedScene
 	if packed == null:

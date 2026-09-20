@@ -35,7 +35,7 @@ func _build_options() -> void:
 	_window_mode_option.add_item("WINDOW_MODE_EXCLUSIVE", GameSettings.WindowMode.EXCLUSIVE)
 
 	_resolution_option.clear()
-	for i: int in GameSettings.RESOLUTIONS.size():
+	for i: int in GameSettings.available_resolution_indices():
 		var res: Vector2i = GameSettings.RESOLUTIONS[i]
 		_resolution_option.add_item("%d x %d" % [res.x, res.y], i)
 

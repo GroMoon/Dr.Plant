@@ -7,13 +7,26 @@ const BGM_TITLE_PATH: String = "res://assets/audio/bgm/title.ogg"
 const SFX_SELECT_PATH: String = "res://assets/audio/sfx/ui_select.wav"
 const SFX_MOVE_PATH: String = "res://assets/audio/sfx/ui_move.wav"
 
+## 챕터 연출용 효과음. 파일이 있으면 쓰고, 없으면 코드로 만든 임시음으로 대체한다.
+const SFX_DOOR_OPEN_PATH: String = "res://assets/audio/sfx/door_1.mp3"
+const SFX_DOOR_CLOSE_PATH: String = "res://assets/audio/sfx/door_2.mp3"
+const SFX_STEPS_PATH: String = "res://assets/audio/sfx/step_1.mp3"
+const SFX_KNOCK_PATH: String = "res://assets/audio/sfx/knock.wav"
+const SFX_CHIME_PATH: String = "res://assets/audio/sfx/chime.wav"
+const SFX_WINDOW_PATH: String = "res://assets/audio/sfx/window_open.wav"
+const AMB_MURMUR_PATH: String = "res://assets/audio/ambience/murmur.ogg"
+
 const MIX_RATE: int = 22050
+const AMBIENCE_FADE: float = 0.6
 
 var _bgm_player: AudioStreamPlayer
 var _sfx_player: AudioStreamPlayer
+var _steps_player: AudioStreamPlayer
+var _murmur_player: AudioStreamPlayer
 var _sfx_select: AudioStream
 var _sfx_move: AudioStream
 var _bgm_title: AudioStream
+var _sfx_table: Dictionary = {}
 
 
 func _ready() -> void:
@@ -29,9 +42,30 @@ func _ready() -> void:
 	_sfx_player.name = "SfxPlayer"
 	add_child(_sfx_player)
 
+	_steps_player = AudioStreamPlayer.new()
+	_steps_player.bus = "SFX"
+	_steps_player.name = "StepsPlayer"
+	add_child(_steps_player)
+
+	_murmur_player = AudioStreamPlayer.new()
+	_murmur_player.bus = "SFX"
+	_murmur_player.name = "MurmurPlayer"
+	add_child(_murmur_player)
+
 	_sfx_select = _load_or_generate(SFX_SELECT_PATH, _make_blip(880.0, 0.07, 0.35))
 	_sfx_move = _load_or_generate(SFX_MOVE_PATH, _make_blip(1320.0, 0.04, 0.2))
 	_bgm_title = _load_or_generate(BGM_TITLE_PATH, _make_pad_loop())
+
+	_steps_player.stream = _looped(_load_or_generate(SFX_STEPS_PATH, _make_steps_loop()))
+	_murmur_player.stream = _looped(_load_or_generate(AMB_MURMUR_PATH, _make_murmur_loop()))
+
+	_sfx_table = {
+		&"door_open": _load_or_generate(SFX_DOOR_OPEN_PATH, _make_creak()),
+		&"door_close": _load_or_generate(SFX_DOOR_CLOSE_PATH, _make_creak()),
+		&"knock": _load_or_generate(SFX_KNOCK_PATH, _make_knock()),
+		&"chime": _load_or_generate(SFX_CHIME_PATH, _make_chime()),
+		&"window_open": _load_or_generate(SFX_WINDOW_PATH, _make_whoosh()),
+	}
 
 
 func play_bgm_title() -> void:
@@ -51,6 +85,73 @@ func play_select() -> void:
 
 func play_move() -> void:
 	_play_sfx(_sfx_move)
+
+
+## 챕터 연출용 효과음. id: door_open / door_close / knock / chime / window_open
+## 대사·발소리와 겹칠 수 있어 일회용 플레이어로 재생한다.
+func play_sfx(id: StringName) -> void:
+	var stream: AudioStream = _sfx_table.get(id, null)
+	if stream == null:
+		push_warning("등록되지 않은 효과음: %s" % id)
+		return
+	var player := AudioStreamPlayer.new()
+	player.bus = "SFX"
+	player.stream = stream
+	player.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(player)
+	player.finished.connect(player.queue_free)
+	player.play()
+
+
+## 발소리·웅성거림 같은 반복 환경음. kind: steps / murmur
+func start_ambience(kind: StringName, volume_db: float = -6.0) -> void:
+	var player: AudioStreamPlayer = _ambience_player(kind)
+	if player == null or player.stream == null:
+		return
+	player.volume_db = -60.0
+	if not player.playing:
+		player.play()
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", volume_db, AMBIENCE_FADE)
+
+
+func stop_ambience(kind: StringName) -> void:
+	var player: AudioStreamPlayer = _ambience_player(kind)
+	if player == null or not player.playing:
+		return
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", -60.0, AMBIENCE_FADE)
+	tween.tween_callback(player.stop)
+
+
+func stop_all_ambience() -> void:
+	stop_ambience(&"steps")
+	stop_ambience(&"murmur")
+
+
+func _ambience_player(kind: StringName) -> AudioStreamPlayer:
+	match kind:
+		&"steps":
+			return _steps_player
+		&"murmur":
+			return _murmur_player
+	push_warning("등록되지 않은 환경음: %s" % kind)
+	return null
+
+
+## 반복 재생하도록 복제한 스트림을 돌려준다.
+func _looped(stream: AudioStream) -> AudioStream:
+	if stream == null:
+		return null
+	var copy: AudioStream = stream.duplicate()
+	if copy is AudioStreamMP3 or copy is AudioStreamOggVorbis:
+		copy.set("loop", true)
+	elif copy is AudioStreamWAV:
+		var wav := copy as AudioStreamWAV
+		wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		wav.loop_begin = 0
+		wav.loop_end = int(wav.data.size() / 2.0) - 1
+	return copy
 
 
 func _play_sfx(stream: AudioStream) -> void:
@@ -98,6 +199,117 @@ func _make_pad_loop() -> AudioStreamWAV:
 func _write_sample(data: PackedByteArray, index: int, value: float) -> void:
 	var clamped: int = int(clampf(value, -1.0, 1.0) * 32767.0)
 	data.encode_s16(index * 2, clamped)
+
+
+## 문이 끼익 열리는 소리(에셋이 없을 때만 쓰는 대체음).
+func _make_creak() -> AudioStreamWAV:
+	var duration: float = 0.9
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	for i: int in frames:
+		var t: float = float(i) / MIX_RATE
+		var ratio: float = t / duration
+		var freq: float = lerpf(180.0, 420.0, ratio)
+		var envelope: float = sin(PI * ratio)
+		var wobble: float = 0.6 + 0.4 * sin(TAU * 11.0 * t)
+		_write_sample(data, i, sin(TAU * freq * t) * envelope * wobble * 0.18)
+	return _make_wav(data, false, 0, 0)
+
+
+## 똑똑. 두 번 두드리는 소리.
+func _make_knock() -> AudioStreamWAV:
+	var duration: float = 0.7
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	var hits: Array[float] = [0.0, 0.26]
+	for i: int in frames:
+		var t: float = float(i) / MIX_RATE
+		var sample: float = 0.0
+		for hit: float in hits:
+			var dt: float = t - hit
+			if dt < 0.0 or dt > 0.18:
+				continue
+			var envelope: float = exp(-dt * 38.0)
+			sample += (sin(TAU * 140.0 * dt) + 0.5 * sin(TAU * 320.0 * dt)) * envelope * 0.35
+		_write_sample(data, i, sample)
+	return _make_wav(data, false, 0, 0)
+
+
+## 병원 내부 알림음.
+func _make_chime() -> AudioStreamWAV:
+	var duration: float = 1.6
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	var notes: Array[float] = [880.0, 1174.66]
+	for i: int in frames:
+		var t: float = float(i) / MIX_RATE
+		var sample: float = 0.0
+		for n: int in notes.size():
+			var start: float = n * 0.35
+			var dt: float = t - start
+			if dt < 0.0:
+				continue
+			sample += sin(TAU * notes[n] * dt) * exp(-dt * 3.2) * 0.22
+		_write_sample(data, i, sample)
+	return _make_wav(data, false, 0, 0)
+
+
+## 창문이 열리며 스치는 소리.
+func _make_whoosh() -> AudioStreamWAV:
+	var duration: float = 1.1
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20260920
+	var smoothed: float = 0.0
+	for i: int in frames:
+		var ratio: float = float(i) / float(frames)
+		var envelope: float = sin(PI * ratio)
+		smoothed = lerpf(smoothed, rng.randf_range(-1.0, 1.0), 0.08)
+		_write_sample(data, i, smoothed * envelope * 0.25)
+	return _make_wav(data, false, 0, 0)
+
+
+## 발소리 루프(에셋이 없을 때만 쓰는 대체음).
+func _make_steps_loop() -> AudioStreamWAV:
+	var duration: float = 1.2
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	var steps: Array[float] = [0.0, 0.6]
+	for i: int in frames:
+		var t: float = float(i) / MIX_RATE
+		var sample: float = 0.0
+		for step: float in steps:
+			var dt: float = t - step
+			if dt < 0.0 or dt > 0.12:
+				continue
+			sample += sin(TAU * 95.0 * dt) * exp(-dt * 55.0) * 0.3
+		_write_sample(data, i, sample)
+	return _make_wav(data, true, 0, frames - 1)
+
+
+## 식물들이 웅성대는 소리(낮은 잡음 루프).
+func _make_murmur_loop() -> AudioStreamWAV:
+	var duration: float = 3.0
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 991120
+	var smoothed: float = 0.0
+	for i: int in frames:
+		var t: float = float(i) / MIX_RATE
+		smoothed = lerpf(smoothed, rng.randf_range(-1.0, 1.0), 0.02)
+		var swell: float = 0.6 + 0.4 * sin(TAU * t / duration)
+		# 루프 이음매가 튀지 않도록 양 끝을 줄인다.
+		var edge: float = clampf(minf(t, duration - t) / 0.3, 0.0, 1.0)
+		_write_sample(data, i, smoothed * swell * edge * 0.12)
+	return _make_wav(data, true, 0, frames - 1)
 
 
 func _make_wav(data: PackedByteArray, looped: bool, loop_begin: int, loop_end: int) -> AudioStreamWAV:

@@ -1,0 +1,169 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scripts/test/test_doctor_sprite.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://scenes/field/field_player.tscn" id="2_player"]
+[ext_resource type="Texture2D" path="res://assets/characters/sprite/doctor_tmp.png" id="3_sheet"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/bg_1.png" id="4_map"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="5_pause"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tl_block"]
+size = Vector2(900, 420)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tr_block"]
+size = Vector2(873, 420)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bl_build"]
+size = Vector2(645, 450)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bl_plant"]
+size = Vector2(165, 480)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bl_trees"]
+size = Vector2(285, 354)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bl_fountain"]
+size = Vector2(276, 228)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_br_build"]
+size = Vector2(768, 405)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_br_plant"]
+size = Vector2(120, 720)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_br_gate"]
+size = Vector2(618, 189)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_border_h"]
+size = Vector2(2388, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_border_v"]
+size = Vector2(60, 1344)
+
+[node name="TestDoctorSprite" type="Node2D"]
+script = ExtResource("1_test")
+
+[node name="Map" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(1194, 672)
+scale = Vector2(3, 3)
+texture = ExtResource("4_map")
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="TlBlock" type="CollisionShape2D" parent="Walls"]
+position = Vector2(450, 210)
+shape = SubResource("RectangleShape2D_tl_block")
+
+[node name="TrBlock" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1951.5, 210)
+shape = SubResource("RectangleShape2D_tr_block")
+
+[node name="BlBuild" type="CollisionShape2D" parent="Walls"]
+position = Vector2(322.5, 705)
+shape = SubResource("RectangleShape2D_bl_build")
+
+[node name="BlPlant" type="CollisionShape2D" parent="Walls"]
+position = Vector2(832.5, 960)
+shape = SubResource("RectangleShape2D_bl_plant")
+
+[node name="BlTrees" type="CollisionShape2D" parent="Walls"]
+position = Vector2(142.5, 1167)
+shape = SubResource("RectangleShape2D_bl_trees")
+
+[node name="BlFountain" type="CollisionShape2D" parent="Walls"]
+position = Vector2(438, 1230)
+shape = SubResource("RectangleShape2D_bl_fountain")
+
+[node name="BrBuild" type="CollisionShape2D" parent="Walls"]
+position = Vector2(2004, 712.5)
+shape = SubResource("RectangleShape2D_br_build")
+
+[node name="BrPlant" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1575, 840)
+shape = SubResource("RectangleShape2D_br_plant")
+
+[node name="BrGate" type="CollisionShape2D" parent="Walls"]
+position = Vector2(2079, 1249.5)
+shape = SubResource("RectangleShape2D_br_gate")
+
+[node name="BorderTop" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1194, -30)
+shape = SubResource("RectangleShape2D_border_h")
+
+[node name="BorderBottom" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1194, 1374)
+shape = SubResource("RectangleShape2D_border_h")
+
+[node name="BorderLeft" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-30, 672)
+shape = SubResource("RectangleShape2D_border_v")
+
+[node name="BorderRight" type="CollisionShape2D" parent="Walls"]
+position = Vector2(2418, 672)
+shape = SubResource("RectangleShape2D_border_v")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(1215, 690)
+
+[node name="Camera" type="Camera2D" parent="."]
+position = Vector2(1215, 690)
+limit_left = 0
+limit_top = 0
+limit_right = 2388
+limit_bottom = 1344
+
+[node name="Ui" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="Panel" type="PanelContainer" parent="Ui"]
+offset_left = 48.0
+offset_top = 40.0
+offset_right = 840.0
+offset_bottom = 460.0
+
+[node name="Rows" type="VBoxContainer" parent="Ui/Panel"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Ui/Panel/Rows"]
+theme_override_colors/font_color = Color(0.937, 0.729, 0.325, 1)
+theme_override_font_sizes/font_size = 24
+text = "TEST — doctor_tmp 스프라이트 확인 (프로토타입)"
+
+[node name="Notice" type="Label" parent="Ui/Panel/Rows"]
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.8)
+theme_override_font_sizes/font_size = 17
+text = "임시 시트다. 1화가 끝나면 이 맵으로 이어진다. 여기서 행을 맞춘 뒤 그 값을 FieldPlayer 기본값으로 옮긴다."
+autowrap_mode = 3
+
+[node name="Controls" type="Label" parent="Ui/Panel/Rows"]
+theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 0.9)
+theme_override_font_sizes/font_size = 18
+text = "WASD · 방향키 · 스틱 = 이동     1~5 = 걷기 행     Shift+1~5 = 제자리 행     R = 초기화     ESC = 일시정지·설정"
+autowrap_mode = 3
+
+[node name="Mapping" type="Label" parent="Ui/Panel/Rows"]
+theme_override_font_sizes/font_size = 20
+text = "걷기/제자리 행:"
+
+[node name="Legend" type="Label" parent="Ui/Panel/Rows"]
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.7)
+theme_override_font_sizes/font_size = 16
+text = "노란 띠 = 걷기 행,  파란 띠 = 제자리 행 (둘이 같으면 첫 프레임만 쓴다)"
+
+[node name="Sheet" type="TextureRect" parent="Ui/Panel/Rows"]
+custom_minimum_size = Vector2(256, 240)
+texture_filter = 1
+size_flags_horizontal = 0
+texture = ExtResource("3_sheet")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WalkHighlight" type="ColorRect" parent="Ui/Panel/Rows/Sheet"]
+mouse_filter = 2
+color = Color(1, 0.898, 0.494, 0.3)
+
+[node name="IdleHighlight" type="ColorRect" parent="Ui/Panel/Rows/Sheet"]
+mouse_filter = 2
+color = Color(0.494, 0.749, 1, 0.3)
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]

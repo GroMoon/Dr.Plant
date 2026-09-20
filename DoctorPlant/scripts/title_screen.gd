@@ -86,6 +86,7 @@ func _on_slot_chosen(slot: int) -> void:
 	if data.is_empty():
 		data = SaveSystem.create_slot(slot)
 	SaveSystem.current_slot = slot
-	var scene_path: String = String(data.get("scene", "res://scenes/chapter_stub.tscn"))
+	StoryState.load_from_slot(slot)
+	var scene_path: String = String(data.get("scene", "res://scenes/ch1/ep1.tscn"))
 	AudioManager.stop_bgm()
 	SceneRouter.change_scene(scene_path)

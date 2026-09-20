@@ -14,6 +14,11 @@ func _ready() -> void:
 		_mouse(MOUSE_BUTTON_LEFT),
 		_pad(JOY_BUTTON_A),
 	])
+	# 필드 이동(WASD · 방향키 · 왼쪽 스틱).
+	_ensure_action("move_left", [_key(KEY_A), _key(KEY_LEFT), _axis(JOY_AXIS_LEFT_X, -1.0)])
+	_ensure_action("move_right", [_key(KEY_D), _key(KEY_RIGHT), _axis(JOY_AXIS_LEFT_X, 1.0)])
+	_ensure_action("move_up", [_key(KEY_W), _key(KEY_UP), _axis(JOY_AXIS_LEFT_Y, -1.0)])
+	_ensure_action("move_down", [_key(KEY_S), _key(KEY_DOWN), _axis(JOY_AXIS_LEFT_Y, 1.0)])
 	_ensure_action("pause", [
 		_key(KEY_ESCAPE),
 		_pad(JOY_BUTTON_START),
@@ -50,6 +55,13 @@ func _key(keycode: Key) -> InputEventKey:
 func _mouse(button: MouseButton) -> InputEventMouseButton:
 	var event := InputEventMouseButton.new()
 	event.button_index = button
+	return event
+
+
+func _axis(axis: JoyAxis, value: float) -> InputEventJoypadMotion:
+	var event := InputEventJoypadMotion.new()
+	event.axis = axis
+	event.axis_value = value
 	return event
 
 

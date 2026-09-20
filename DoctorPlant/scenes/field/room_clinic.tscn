@@ -1,0 +1,332 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/field/field_room.gd" id="1_room"]
+[ext_resource type="Script" path="res://scripts/field/interactable.gd" id="2_interactable"]
+[ext_resource type="Script" path="res://scripts/field/plant_figure.gd" id="3_figure"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_top"]
+size = Vector2(1400, 150)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_bottom"]
+size = Vector2(1400, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_side"]
+size = Vector2(50, 900)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_desk"]
+size = Vector2(400, 110)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_chair"]
+size = Vector2(100, 100)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_spot"]
+radius = 72.0
+
+[sub_resource type="Gradient" id="Gradient_window"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.784, 0.898, 0.965, 1, 0.984, 0.933, 0.733, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_window"]
+gradient = SubResource("Gradient_window")
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
+
+[node name="RoomClinic" type="Node2D"]
+script = ExtResource("1_room")
+camera_bounds = Rect2(0, 0, 1400, 900)
+spawn_point = Vector2(700, 620)
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_right = 1400.0
+offset_bottom = 900.0
+mouse_filter = 2
+color = Color(0.878, 0.855, 0.792, 1)
+
+[node name="FloorLine1" type="ColorRect" parent="."]
+offset_top = 560.0
+offset_right = 1400.0
+offset_bottom = 564.0
+mouse_filter = 2
+color = Color(0.816, 0.788, 0.718, 1)
+
+[node name="FloorLine2" type="ColorRect" parent="."]
+offset_left = 698.0
+offset_top = 150.0
+offset_right = 702.0
+offset_bottom = 900.0
+mouse_filter = 2
+color = Color(0.816, 0.788, 0.718, 1)
+
+[node name="WallTop" type="ColorRect" parent="."]
+offset_right = 1400.0
+offset_bottom = 150.0
+mouse_filter = 2
+color = Color(0.792, 0.839, 0.804, 1)
+
+[node name="WallBase" type="ColorRect" parent="."]
+offset_top = 150.0
+offset_right = 1400.0
+offset_bottom = 162.0
+mouse_filter = 2
+color = Color(0.639, 0.698, 0.655, 1)
+
+[node name="Desk" type="ColorRect" parent="."]
+offset_left = 180.0
+offset_top = 300.0
+offset_right = 580.0
+offset_bottom = 410.0
+mouse_filter = 2
+color = Color(0.478, 0.376, 0.29, 1)
+
+[node name="Computer" type="ColorRect" parent="."]
+offset_left = 258.0
+offset_top = 304.0
+offset_right = 358.0
+offset_bottom = 368.0
+mouse_filter = 2
+color = Color(0.157, 0.18, 0.212, 1)
+
+[node name="ComputerScreen" type="ColorRect" parent="."]
+offset_left = 266.0
+offset_top = 312.0
+offset_right = 350.0
+offset_bottom = 356.0
+mouse_filter = 2
+color = Color(0.427, 0.667, 0.678, 1)
+
+[node name="Scheduler" type="ColorRect" parent="."]
+offset_left = 448.0
+offset_top = 320.0
+offset_right = 544.0
+offset_bottom = 366.0
+mouse_filter = 2
+color = Color(0.945, 0.937, 0.886, 1)
+
+[node name="SchedulerMark" type="ColorRect" parent="."]
+offset_left = 456.0
+offset_top = 348.0
+offset_right = 536.0
+offset_bottom = 356.0
+mouse_filter = 2
+color = Color(0.937, 0.729, 0.325, 1)
+
+[node name="FrameA" type="ColorRect" parent="."]
+offset_left = 720.0
+offset_top = 54.0
+offset_right = 804.0
+offset_bottom = 142.0
+mouse_filter = 2
+color = Color(0.408, 0.325, 0.239, 1)
+
+[node name="FrameAPaper" type="ColorRect" parent="."]
+offset_left = 730.0
+offset_top = 64.0
+offset_right = 794.0
+offset_bottom = 132.0
+mouse_filter = 2
+color = Color(0.976, 0.965, 0.925, 1)
+
+[node name="FrameB" type="ColorRect" parent="."]
+offset_left = 896.0
+offset_top = 54.0
+offset_right = 980.0
+offset_bottom = 142.0
+mouse_filter = 2
+color = Color(0.408, 0.325, 0.239, 1)
+
+[node name="FrameBPaper" type="ColorRect" parent="."]
+offset_left = 906.0
+offset_top = 64.0
+offset_right = 970.0
+offset_bottom = 132.0
+mouse_filter = 2
+color = Color(0.886, 0.925, 0.867, 1)
+
+[node name="Window" type="TextureRect" parent="."]
+offset_left = 1334.0
+offset_top = 250.0
+offset_right = 1400.0
+offset_bottom = 460.0
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_window")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="WindowFrame" type="ColorRect" parent="."]
+offset_left = 1326.0
+offset_top = 242.0
+offset_right = 1336.0
+offset_bottom = 468.0
+mouse_filter = 2
+color = Color(0.847, 0.855, 0.839, 1)
+
+[node name="Door" type="ColorRect" parent="."]
+offset_left = 618.0
+offset_top = 852.0
+offset_right = 782.0
+offset_bottom = 900.0
+mouse_filter = 2
+color = Color(0.478, 0.353, 0.251, 1)
+
+[node name="PatientChair" type="ColorRect" parent="."]
+offset_left = 858.0
+offset_top = 480.0
+offset_right = 962.0
+offset_bottom = 584.0
+mouse_filter = 2
+color = Color(0.557, 0.49, 0.443, 1)
+
+[node name="DoctorChair" type="ColorRect" parent="."]
+offset_left = 198.0
+offset_top = 432.0
+offset_right = 302.0
+offset_bottom = 536.0
+mouse_filter = 2
+color = Color(0.353, 0.302, 0.275, 1)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="WallTopShape" type="CollisionShape2D" parent="Walls"]
+position = Vector2(700, 75)
+shape = SubResource("RectangleShape2D_wall_top")
+
+[node name="WallBottomShape" type="CollisionShape2D" parent="Walls"]
+position = Vector2(700, 875)
+shape = SubResource("RectangleShape2D_wall_bottom")
+
+[node name="WallLeftShape" type="CollisionShape2D" parent="Walls"]
+position = Vector2(25, 450)
+shape = SubResource("RectangleShape2D_wall_side")
+
+[node name="WallRightShape" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1375, 450)
+shape = SubResource("RectangleShape2D_wall_side")
+
+[node name="DeskShape" type="CollisionShape2D" parent="Walls"]
+position = Vector2(380, 355)
+shape = SubResource("RectangleShape2D_desk")
+
+[node name="PatientChairShape" type="CollisionShape2D" parent="Walls"]
+position = Vector2(910, 532)
+shape = SubResource("RectangleShape2D_chair")
+
+[node name="DoctorChairShape" type="CollisionShape2D" parent="Walls"]
+position = Vector2(250, 484)
+shape = SubResource("RectangleShape2D_chair")
+
+[node name="Tint" type="ColorRect" parent="."]
+offset_right = 1400.0
+offset_bottom = 900.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Npcs" type="Node2D" parent="."]
+
+[node name="Patient" type="Node2D" parent="Npcs"]
+visible = false
+position = Vector2(910, 500)
+script = ExtResource("3_figure")
+petal_color = Color(0.784, 0.867, 0.973, 1)
+coat_color = Color(0.886, 0.878, 0.839, 1)
+figure_scale = 1.6
+
+[node name="Interactables" type="Node2D" parent="."]
+
+[node name="Computer" type="Area2D" parent="Interactables"]
+position = Vector2(300, 470)
+script = ExtResource("2_interactable")
+id = "computer"
+label_key = "EP1_OBJ_COMPUTER"
+description_key = "EP1_SYS_COMPUTER"
+option_keys = PackedStringArray("EP1_OPT_PATIENT_LIST", "EP1_OPT_MESSENGER", "EP1_OPT_INTERNET")
+option_description_keys = PackedStringArray("EP1_SYS_PATIENT_LIST", "EP1_SYS_MESSENGER", "EP1_SYS_INTERNET")
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Computer"]
+shape = SubResource("CircleShape2D_spot")
+
+[node name="Marker" type="Polygon2D" parent="Interactables/Computer"]
+modulate = Color(1, 1, 1, 0.35)
+position = Vector2(0, -90)
+color = Color(1, 0.898, 0.494, 1)
+polygon = PackedVector2Array(0, 16, -14, -8, 14, -8)
+
+[node name="Scheduler" type="Area2D" parent="Interactables"]
+position = Vector2(500, 470)
+script = ExtResource("2_interactable")
+id = "scheduler"
+label_key = "EP1_OBJ_SCHEDULER"
+description_key = "EP1_SYS_SCHEDULER"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Scheduler"]
+shape = SubResource("CircleShape2D_spot")
+
+[node name="Marker" type="Polygon2D" parent="Interactables/Scheduler"]
+modulate = Color(1, 1, 1, 0.35)
+position = Vector2(0, -90)
+color = Color(1, 0.898, 0.494, 1)
+polygon = PackedVector2Array(0, 16, -14, -8, 14, -8)
+
+[node name="FrameA" type="Area2D" parent="Interactables"]
+position = Vector2(762, 240)
+script = ExtResource("2_interactable")
+id = "frame_a"
+label_key = "EP1_OBJ_FRAME_A"
+description_key = "EP1_SYS_FRAME_A"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/FrameA"]
+shape = SubResource("CircleShape2D_spot")
+
+[node name="Marker" type="Polygon2D" parent="Interactables/FrameA"]
+modulate = Color(1, 1, 1, 0.35)
+position = Vector2(0, -90)
+color = Color(1, 0.898, 0.494, 1)
+polygon = PackedVector2Array(0, 16, -14, -8, 14, -8)
+
+[node name="FrameB" type="Area2D" parent="Interactables"]
+position = Vector2(938, 240)
+script = ExtResource("2_interactable")
+id = "frame_b"
+label_key = "EP1_OBJ_FRAME_B"
+description_key = "EP1_SYS_FRAME_B"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/FrameB"]
+shape = SubResource("CircleShape2D_spot")
+
+[node name="Marker" type="Polygon2D" parent="Interactables/FrameB"]
+modulate = Color(1, 1, 1, 0.35)
+position = Vector2(0, -90)
+color = Color(1, 0.898, 0.494, 1)
+polygon = PackedVector2Array(0, 16, -14, -8, 14, -8)
+
+[node name="Door" type="Area2D" parent="Interactables"]
+position = Vector2(700, 796)
+script = ExtResource("2_interactable")
+id = "door"
+label_key = "EP1_OBJ_DOOR"
+description_key = "EP1_SYS_CALL_NEXT"
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/Door"]
+shape = SubResource("CircleShape2D_spot")
+
+[node name="Marker" type="Polygon2D" parent="Interactables/Door"]
+modulate = Color(1, 1, 1, 0.35)
+position = Vector2(0, -90)
+color = Color(1, 0.898, 0.494, 1)
+polygon = PackedVector2Array(0, 16, -14, -8, 14, -8)
+
+[node name="SunButton" type="Area2D" parent="Interactables"]
+visible = false
+position = Vector2(1262, 360)
+script = ExtResource("2_interactable")
+id = "sun_button"
+label_key = "EP1_OBJ_SUN_BUTTON"
+enabled = false
+
+[node name="Shape" type="CollisionShape2D" parent="Interactables/SunButton"]
+shape = SubResource("CircleShape2D_spot")
+
+[node name="Marker" type="Polygon2D" parent="Interactables/SunButton"]
+modulate = Color(1, 1, 1, 0.35)
+position = Vector2(0, -90)
+color = Color(1, 0.855, 0.373, 1)
+polygon = PackedVector2Array(0, 16, -14, -8, 14, -8)

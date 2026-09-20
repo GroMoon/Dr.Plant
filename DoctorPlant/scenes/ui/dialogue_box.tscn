@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue_box.gd" id="1_box"]
+[ext_resource type="Script" path="res://scripts/ui/dialogue_label.gd" id="2_label"]
+
+[node name="DialogueBox" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_box")
+
+[node name="Box" type="PanelContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 96.0
+offset_top = -288.0
+offset_right = -96.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Box"]
+mouse_filter = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 20
+
+[node name="Rows" type="VBoxContainer" parent="Box/Margin"]
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Speaker" type="Label" parent="Box/Margin/Rows"]
+theme_override_colors/font_color = Color(0.945, 0.957, 0.898, 1)
+theme_override_font_sizes/font_size = 24
+text = "CH_SYSTEM"
+
+[node name="Body" type="Label" parent="Box/Margin/Rows"]
+size_flags_vertical = 3
+autowrap_mode = 3
+script = ExtResource("2_label")
+
+[node name="Arrow" type="Label" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -148.0
+offset_top = -108.0
+offset_right = -112.0
+offset_bottom = -72.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 0.9)
+theme_override_font_sizes/font_size = 26
+text = "▼"
+horizontal_alignment = 1
