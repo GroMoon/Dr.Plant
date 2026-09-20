@@ -1,3 +1,12 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# 에셋 임포트 설정 파일 (각 PC에서 재생성)
+*.import
+
+# 빌드 산출물 (export 결과물은 저장소에 넣지 않는다)
+/build/
+*.exe
+*.pck
+*.zip
