@@ -1,6 +1,9 @@
 extends CanvasLayer
 ## ESC(또는 패드 START)로 열리는 일시정지 메뉴.
 ## 게임 씬 어디에든 인스턴스로 붙여 쓴다.
+## "나가기"는 확인 후 타이틀 화면으로 돌아간다 (SET-020).
+
+const TITLE_SCENE: String = "res://scenes/title_screen.tscn"
 
 signal opened
 signal closed
@@ -87,12 +90,14 @@ func _on_settings_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	AudioManager.play_select()
-	_confirm_popup.open("QUIT_CONFIRM", _quit_button)
+	_confirm_popup.open("PAUSE_QUIT_CONFIRM", _quit_button)
 
 
 func _on_quit_confirmed() -> void:
-	get_tree().paused = false
-	get_tree().quit()
+	_root.hide()
+	AudioManager.stop_all_ambience()
+	AudioManager.play_bgm_title()
+	SceneRouter.change_scene(TITLE_SCENE)
 
 
 func _on_child_panel_closed() -> void:
