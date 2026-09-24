@@ -1,6 +1,6 @@
 extends RefCounted
 ## 챕터 1 / 1화 진행 대본. episode_player.gd 가 위에서부터 실행한다.
-## 원문: design/requirements/ch1/03. story progress(1ep).md
+## 원문: design/requirements/ch1/03-ep1-script.md
 ##
 ## 명령 종류
 ##   title/end  : 장·에피소드 카드            {label, title, sub, time}
