@@ -1,7 +1,7 @@
 extends Control
 ## 진찰 미니게임 — **임시 구현(스텁)**.
 ##
-## design/requirements/ch1/02. mini game.md 에 "미니게임 1" 제목만 있고
+## design/requirements/ch1/02-minigame.md 에 "미니게임 1" 제목만 있고
 ## 규칙이 비어 있어, 스토리가 끊기지 않도록 최소 절차만 만들어 두었다.
 ## 환자의 빛나는 부위 세 곳을 살피면 진찰이 끝난다.
 ## 기획이 확정되면 이 씬만 갈아끼우면 된다(episode_player 의 minigame 명령).

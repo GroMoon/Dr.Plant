@@ -3,7 +3,7 @@ extends RefCounted
 ## localization.gd 가 이 테이블을 읽어 TranslationServer 에 등록하므로
 ## 씬에서는 다른 UI 문자열과 똑같이 tr("EP1_...") 로 쓴다.
 ##
-## 원문: design/requirements/ch1/03. story progress(1ep).md
+## 원문: design/requirements/ch1/03-ep1-script.md
 ## 영어는 임시 번역이다(요구사항 메모 참조).
 
 const STRINGS: Dictionary = {
