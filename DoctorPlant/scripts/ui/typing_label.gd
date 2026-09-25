@@ -1,4 +1,4 @@
-class_name DialogueLabel
+class_name TypingLabel
 extends Label
 ## 설정의 "텍스트 속도 / 텍스트 크기"가 실제로 적용되는 대사 라벨.
 ## 한 글자씩 출력하고, 진행 입력을 받으면 즉시 전체를 보여준다.

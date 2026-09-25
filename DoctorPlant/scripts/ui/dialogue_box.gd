@@ -1,7 +1,7 @@
 extends Control
 class_name DialogueBox
 ## 비주얼 노벨 대사창. 화자 이름 + 본문 + 진행 화살표.
-## 본문은 DialogueLabel 이라 설정의 텍스트 속도·크기가 그대로 적용된다.
+## 본문은 TypingLabel 이라 설정의 텍스트 속도·크기가 그대로 적용된다.
 
 signal line_finished
 
@@ -13,7 +13,7 @@ const SPEAKER_COLORS: Dictionary = {
 const SPEAKER_COLOR_DEFAULT: Color = Color(0.945, 0.957, 0.898)
 
 @onready var _speaker: Label = $Box/Margin/Rows/Speaker
-@onready var _body: DialogueLabel = $Box/Margin/Rows/Body
+@onready var _body: TypingLabel = $Box/Margin/Rows/Body
 @onready var _arrow: Label = $Arrow
 
 var _speaker_key: String = ""

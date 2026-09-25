@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/dialogue_box.gd" id="1_box"]
-[ext_resource type="Script" path="res://scripts/ui/dialogue_label.gd" id="2_label"]
+[ext_resource type="Script" path="res://scripts/ui/typing_label.gd" id="2_label"]
 
 [node name="DialogueBox" type="Control"]
 anchor_right = 1.0

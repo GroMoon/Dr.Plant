@@ -5,7 +5,7 @@ extends Control
 
 const LINE_KEYS: Array[String] = ["STUB_LINE_1", "STUB_LINE_2", "STUB_LINE_3"]
 
-@onready var _dialogue: DialogueLabel = $DialogueBox/Dialogue
+@onready var _dialogue: TypingLabel = $DialogueBox/Dialogue
 @onready var _progress_hint: Label = $ProgressHint
 @onready var _pause_menu: CanvasLayer = $PauseMenu
 
