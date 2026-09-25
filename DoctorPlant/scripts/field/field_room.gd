@@ -8,6 +8,9 @@ signal focus_changed(target: Interactable)
 ## 조사 지점이 실제로 선택되었을 때.
 signal interaction_requested(target: Interactable)
 
+## 인물(NPC)을 모아 두는 노드 이름. Npcs 는 대본이 켜고 끄는 인물, Crowd 는 배경 인물.
+const FIGURE_HOLDERS: Array[String] = ["Npcs", "Crowd"]
+
 ## 카메라가 벗어나지 않을 범위.
 @export var camera_bounds: Rect2 = Rect2(0.0, 0.0, 960.0, 640.0)
 ## 플레이어 등장 위치.
@@ -32,6 +35,19 @@ func interactables() -> Array[Interactable]:
 	for child: Node in (holder if holder != null else self).get_children():
 		if child is Interactable:
 			found.append(child)
+	return found
+
+
+## 방 안의 인물(Npcs·Crowd 아래 노드). 말풍선 혼잣말 대상이다.
+func figures() -> Array[Node2D]:
+	var found: Array[Node2D] = []
+	for holder_name: String in FIGURE_HOLDERS:
+		var holder: Node = get_node_or_null(holder_name)
+		if holder == null:
+			continue
+		for child: Node in holder.get_children():
+			if child is Node2D:
+				found.append(child)
 	return found
 
 

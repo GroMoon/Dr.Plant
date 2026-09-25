@@ -20,6 +20,7 @@ const SFX_TYPING_PATH: String = "res://assets/audio/sfx/typing.wav"
 ## 대사 타이핑음이 너무 촘촘하면 "토도도"가 아니라 윙 소리가 되므로 최소 간격을 둔다.
 const TYPING_MIN_INTERVAL: float = 0.05
 const TYPING_PITCH_JITTER: float = 0.06
+const TYPING_VOLUME_DB: float = -4.0
 
 const MIX_RATE: int = 22050
 const AMBIENCE_FADE: float = 0.6
@@ -62,7 +63,6 @@ func _ready() -> void:
 	_typing_player = AudioStreamPlayer.new()
 	_typing_player.bus = "SFX"
 	_typing_player.name = "TypingPlayer"
-	_typing_player.volume_db = -4.0
 	add_child(_typing_player)
 	_typing_player.stream = _load_or_generate(SFX_TYPING_PATH, _make_typing_blip())
 
@@ -102,12 +102,14 @@ func play_move() -> void:
 
 
 ## 대사가 한 글자 찍힐 때의 "토" 소리. 간격이 너무 짧으면 건너뛴다.
-func play_typing() -> void:
+## pitch 는 말하는 인물의 목소리 높이(말풍선 NPC 마다 다르게 준다).
+func play_typing(pitch: float = 1.0, volume_db: float = TYPING_VOLUME_DB) -> void:
 	var now: int = Time.get_ticks_msec()
 	if now - _last_typing_msec < int(TYPING_MIN_INTERVAL * 1000.0):
 		return
 	_last_typing_msec = now
-	_typing_player.pitch_scale = 1.0 + randf_range(-TYPING_PITCH_JITTER, TYPING_PITCH_JITTER)
+	_typing_player.pitch_scale = pitch * (1.0 + randf_range(-TYPING_PITCH_JITTER, TYPING_PITCH_JITTER))
+	_typing_player.volume_db = volume_db
 	_typing_player.play()
 
 

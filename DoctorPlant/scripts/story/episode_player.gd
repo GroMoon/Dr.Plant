@@ -30,6 +30,8 @@ const TINTS: Dictionary = {
 }
 ## 필드에서 조사 지점을 조사하면 대본의 이 접두사 + 지점 id 구간을 실행한다.
 const INSPECT_CUE_PREFIX: String = "inspect_"
+## chatter 명령이 켜지면 인물마다 대본의 이 접두사 + 노드 이름(소문자) 구간을 말풍선으로 중얼거린다.
+const CHATTER_CUE_PREFIX: String = "chatter_"
 
 const FOLLOW_ZOOM: float = 1.6
 
@@ -65,6 +67,7 @@ var _room: FieldRoom = null
 var _player: FieldPlayer = null
 var _view: Node = null
 var _minigame: Node = null
+var _chatter: FieldChatter = null
 var _camera_follow: bool = false
 var _field_active: bool = false
 var _awaiting_advance: bool = false
@@ -180,6 +183,7 @@ func _on_dialogue_mutated(mutation: Dictionary) -> void:
 #   amb_start(id, dB) / amb_stop(id)    반복 환경음
 #   minigame(튜토리얼)                  진찰 미니게임
 #   field(안내 키, 나가는 지점 id)      필드 조작 구간. 조사하면 inspect_<id> 구간 실행
+#   chatter(켬)                         필드 인물 혼잣말 말풍선. 인물별 대사는 chatter_<노드 이름 소문자>
 #   view_open(연출, 초) / view_close(초)  전면 연출 씬. 연출 이름은 VIEWS
 #   save(체크포인트)                    진행 저장
 #
@@ -368,6 +372,35 @@ func field(hint_key: String, exit_id: String) -> void:
 		_player.controllable = false
 
 
+## 켜 두면 필드 구간에서 인물에게 다가갈 때 머리 위 말풍선으로 중얼거린다.
+## 대사가 없는(구간이 없는) 인물은 말하지 않는다. 방을 바꾸면 함께 꺼진다.
+func chatter(on: bool) -> void:
+	if _chatter != null and is_instance_valid(_chatter):
+		_chatter.stop()
+	_chatter = null
+	if not on:
+		return
+	if _room == null:
+		push_error("chatter 명령인데 방이 없다.")
+		return
+	if _player == null:
+		_spawn_player(_room.spawn_point)
+	var lines: Dictionary = {}
+	for figure: Node2D in _room.figures():
+		var cue: String = chatter_cue(figure)
+		if dialogue.cues.has(cue):
+			lines[figure] = await _cue_line_ids(cue)
+	_chatter = FieldChatter.new()
+	_chatter.name = "Chatter"
+	_room.add_child(_chatter)
+	_chatter.setup(_player, lines)
+	_chatter.set_listening(_field_active)
+
+
+static func chatter_cue(figure: Node) -> String:
+	return CHATTER_CUE_PREFIX + String(figure.name).to_lower()
+
+
 func view_open(view_id: String, time: float = 0.8) -> void:
 	var path: String = String(VIEWS.get(view_id, ""))
 	if not ResourceLoader.exists(path):
@@ -418,6 +451,7 @@ func _fade_to(alpha: float, time: float) -> void:
 
 
 func _clear_room() -> void:
+	_chatter = null
 	if _player != null and is_instance_valid(_player):
 		_player.queue_free()
 		_player = null
@@ -443,6 +477,8 @@ func _enable_field(active: bool) -> void:
 		_player.controllable = active
 	if _room != null and is_instance_valid(_room):
 		_room.set_input_enabled(active)
+	if _chatter != null and is_instance_valid(_chatter):
+		_chatter.set_listening(active)
 	if not active:
 		_prompt.hide()
 	elif _room != null and _room.focus() != null:
@@ -454,6 +490,18 @@ func _inspect(target: Interactable) -> void:
 	var cue: String = INSPECT_CUE_PREFIX + target.id
 	if dialogue.cues.has(cue):
 		await _play(cue)
+
+
+## 대본 구간의 대사 키를 순서대로 모은다(말풍선용이라 선택지·연출은 쓰지 않는다).
+func _cue_line_ids(cue: String) -> PackedStringArray:
+	var ids: PackedStringArray = []
+	var behaviour := DMConstants.MutationBehaviour.DoNotWait
+	var line: DialogueLine = await DialogueManager.get_next_dialogue_line(dialogue, cue, _states, behaviour)
+	while line != null:
+		if line.responses.is_empty() and not line.text.is_empty():
+			ids.append(line.static_id if not line.static_id.is_empty() else line.text)
+		line = await DialogueManager.get_next_dialogue_line(dialogue, line.next_id, _states, behaviour)
+	return ids
 
 
 func _on_interaction_requested(_target: Interactable) -> void:

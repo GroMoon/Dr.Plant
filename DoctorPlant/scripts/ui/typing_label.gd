@@ -7,6 +7,11 @@ signal line_finished
 
 ## 글자가 찍힐 때 "토도도" 타이핑음을 낼지.
 @export var typing_sound: bool = true
+## 타이핑음 높이(1.0 = 기본). 말풍선에서 인물마다 목소리를 다르게 줄 때 쓴다.
+@export var voice_pitch: float = 1.0
+@export var voice_volume_db: float = -4.0
+## 설정의 텍스트 크기를 따를지. 말풍선처럼 크기가 정해진 곳은 끈다.
+@export var follow_text_size: bool = true
 
 var _typing: bool = false
 var _shown_chars: float = 0.0
@@ -14,8 +19,9 @@ var _shown_chars: float = 0.0
 
 func _ready() -> void:
 	autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	GameSettings.text_size_changed.connect(_apply_font_size)
-	_apply_font_size(GameSettings.text_size())
+	if follow_text_size:
+		GameSettings.text_size_changed.connect(_apply_font_size)
+		_apply_font_size(GameSettings.text_size())
 	set_process(false)
 
 
@@ -63,7 +69,7 @@ func _play_typing_sound(from: int, to: int) -> void:
 	var shown: String = text.substr(from, to - from)
 	if shown.strip_edges().is_empty():
 		return
-	AudioManager.play_typing()
+	AudioManager.play_typing(voice_pitch, voice_volume_db)
 
 
 func _finish() -> void:

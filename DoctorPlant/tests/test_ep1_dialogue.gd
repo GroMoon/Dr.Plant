@@ -100,6 +100,36 @@ func test_inspect_cues_match_interactables() -> void:
 	assert_eq(orphans.size(), 0, "어느 방에도 없는 조사 지점의 구간: %s" % ", ".join(orphans))
 
 
+## chatter_<이름> 구간 이름이 틀리면 말풍선이 안 뜰 뿐 오류가 없으므로 여기서 잡는다.
+func test_chatter_cues_match_figures() -> void:
+	var cues: PackedStringArray = []
+	for path: String in EPISODE_PLAYER.ROOMS.values():
+		var room: FieldRoom = (load(path) as PackedScene).instantiate()
+		for figure: Node2D in room.figures():
+			cues.append(EPISODE_PLAYER.chatter_cue(figure))
+		room.free()
+	var found: int = 0
+	var orphans: PackedStringArray = []
+	for cue: String in _dialogue.cues.keys():
+		if not cue.begins_with(EPISODE_PLAYER.CHATTER_CUE_PREFIX):
+			continue
+		found += 1
+		if not cues.has(cue):
+			orphans.append(cue)
+	assert_gt(found, 0, "대본에 chatter_ 구간이 하나도 없다.")
+	assert_eq(orphans.size(), 0, "어느 방에도 없는 인물의 혼잣말 구간: %s" % ", ".join(orphans))
+
+
+func test_chatter_cues_speak() -> void:
+	var stage := RecordingStage.new()
+	assert_eq(
+		await _walk("chatter_staff1", stage),
+		PackedStringArray(["EP1_CHAT_STAFF1_01", "EP1_CHAT_STAFF1_02", "EP1_CHAT_STAFF1_03"])
+	)
+	assert_eq(await _walk("chatter_walker2", stage), PackedStringArray(["EP1_CHAT_WALKER2_01"]))
+	stage.free()
+
+
 ## 대본을 처음부터 끝까지 흘려 본다(선택지는 매번 첫 번째).
 ## 연출 명령은 기록만 하는 RecordingStage 가 받는다. EpisodePlayer 를 상속해 같은 시그니처를
 ## 그대로 덮어쓰므로, 대본의 인자 개수·타입이 실제 함수와 어긋나면 여기서 걸린다.
@@ -111,6 +141,7 @@ func test_full_run_reaches_end() -> void:
 	assert_eq(spoken[spoken.size() - 1], "EP1_SYS_TIRED")
 	assert_eq(stage.calls_named("field"), [["EP1_HINT_CLINIC", "door"], ["EP1_HINT_WINDOW", "sun_button"], ["EP1_HINT_EXIT", "exit_door"]])
 	assert_eq(stage.calls_named("minigame"), [[true], [false]])
+	assert_eq(stage.calls_named("chatter"), [[true], [false]])
 	assert_eq(stage.calls_named("save"), [["ep1_s2_clinic"], ["ep1_s2_sunbathing"], ["ep1_s3_evening"]])
 	assert_true(bool(StoryState.get_flag("ep1_prescribed_p1", false)), "환자1 처방 플래그가 저장되지 않았다.")
 	assert_true(bool(StoryState.get_flag("ep1_prescribed_p2", false)), "환자2 처방 플래그가 저장되지 않았다.")
@@ -216,6 +247,9 @@ class RecordingStage extends EpisodePlayer:
 
 	func field(hint_key: String, exit_id: String) -> void:
 		calls.append(["field", hint_key, exit_id])
+
+	func chatter(on: bool) -> void:
+		calls.append(["chatter", on])
 
 	func view_open(view_id: String, time: float = 0.8) -> void:
 		assert(VIEWS.has(view_id), "알 수 없는 연출: %s" % view_id)
