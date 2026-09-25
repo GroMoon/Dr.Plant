@@ -5,6 +5,9 @@ extends Label
 
 signal line_finished
 
+## 글자가 찍힐 때 "토도도" 타이핑음을 낼지.
+@export var typing_sound: bool = true
+
 var _typing: bool = false
 var _shown_chars: float = 0.0
 
@@ -44,10 +47,23 @@ func skip() -> bool:
 
 
 func _process(delta: float) -> void:
+	var before: int = visible_characters
 	_shown_chars += delta * GameSettings.text_speed
 	visible_characters = int(_shown_chars)
+	if visible_characters > before:
+		_play_typing_sound(before, visible_characters)
 	if visible_characters >= get_total_character_count():
 		_finish()
+
+
+## 이번 프레임에 새로 나온 글자 중 공백이 아닌 게 있으면 한 번 소리 낸다.
+func _play_typing_sound(from: int, to: int) -> void:
+	if not typing_sound:
+		return
+	var shown: String = text.substr(from, to - from)
+	if shown.strip_edges().is_empty():
+		return
+	AudioManager.play_typing()
 
 
 func _finish() -> void:

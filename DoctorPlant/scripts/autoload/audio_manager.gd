@@ -15,6 +15,11 @@ const SFX_KNOCK_PATH: String = "res://assets/audio/sfx/knock.wav"
 const SFX_CHIME_PATH: String = "res://assets/audio/sfx/chime.wav"
 const SFX_WINDOW_PATH: String = "res://assets/audio/sfx/window_open.wav"
 const AMB_MURMUR_PATH: String = "res://assets/audio/ambience/murmur.ogg"
+const SFX_TYPING_PATH: String = "res://assets/audio/sfx/typing.wav"
+
+## 대사 타이핑음이 너무 촘촘하면 "토도도"가 아니라 윙 소리가 되므로 최소 간격을 둔다.
+const TYPING_MIN_INTERVAL: float = 0.05
+const TYPING_PITCH_JITTER: float = 0.06
 
 const MIX_RATE: int = 22050
 const AMBIENCE_FADE: float = 0.6
@@ -23,6 +28,8 @@ var _bgm_player: AudioStreamPlayer
 var _sfx_player: AudioStreamPlayer
 var _steps_player: AudioStreamPlayer
 var _murmur_player: AudioStreamPlayer
+var _typing_player: AudioStreamPlayer
+var _last_typing_msec: int = -100000
 var _sfx_select: AudioStream
 var _sfx_move: AudioStream
 var _bgm_title: AudioStream
@@ -51,6 +58,13 @@ func _ready() -> void:
 	_murmur_player.bus = "SFX"
 	_murmur_player.name = "MurmurPlayer"
 	add_child(_murmur_player)
+
+	_typing_player = AudioStreamPlayer.new()
+	_typing_player.bus = "SFX"
+	_typing_player.name = "TypingPlayer"
+	_typing_player.volume_db = -4.0
+	add_child(_typing_player)
+	_typing_player.stream = _load_or_generate(SFX_TYPING_PATH, _make_typing_blip())
 
 	_sfx_select = _load_or_generate(SFX_SELECT_PATH, _make_blip(880.0, 0.07, 0.35))
 	_sfx_move = _load_or_generate(SFX_MOVE_PATH, _make_blip(1320.0, 0.04, 0.2))
@@ -85,6 +99,16 @@ func play_select() -> void:
 
 func play_move() -> void:
 	_play_sfx(_sfx_move)
+
+
+## 대사가 한 글자 찍힐 때의 "토" 소리. 간격이 너무 짧으면 건너뛴다.
+func play_typing() -> void:
+	var now: int = Time.get_ticks_msec()
+	if now - _last_typing_msec < int(TYPING_MIN_INTERVAL * 1000.0):
+		return
+	_last_typing_msec = now
+	_typing_player.pitch_scale = 1.0 + randf_range(-TYPING_PITCH_JITTER, TYPING_PITCH_JITTER)
+	_typing_player.play()
 
 
 ## 챕터 연출용 효과음. id: door_open / door_close / knock / chime / window_open
@@ -199,6 +223,21 @@ func _make_pad_loop() -> AudioStreamWAV:
 func _write_sample(data: PackedByteArray, index: int, value: float) -> void:
 	var clamped: int = int(clampf(value, -1.0, 1.0) * 32767.0)
 	data.encode_s16(index * 2, clamped)
+
+
+## 대사 타이핑음 "토". 둥근 중음에 빠른 감쇠, 앞머리만 살짝 딱딱하게.
+func _make_typing_blip() -> AudioStreamWAV:
+	var duration: float = 0.045
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	for i: int in frames:
+		var t: float = float(i) / MIX_RATE
+		var attack: float = clampf(t / 0.002, 0.0, 1.0)
+		var envelope: float = attack * exp(-t * 70.0)
+		var tone: float = sin(TAU * 520.0 * t) + 0.35 * sin(TAU * 1040.0 * t)
+		_write_sample(data, i, tone * envelope * 0.3)
+	return _make_wav(data, false, 0, 0)
 
 
 ## 문이 끼익 열리는 소리(에셋이 없을 때만 쓰는 대체음).
