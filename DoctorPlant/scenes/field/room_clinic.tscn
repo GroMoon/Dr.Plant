@@ -237,9 +237,6 @@ position = Vector2(300, 470)
 script = ExtResource("2_interactable")
 id = "computer"
 label_key = "EP1_OBJ_COMPUTER"
-description_key = "EP1_SYS_COMPUTER"
-option_keys = PackedStringArray("EP1_OPT_PATIENT_LIST", "EP1_OPT_MESSENGER", "EP1_OPT_INTERNET")
-option_description_keys = PackedStringArray("EP1_SYS_PATIENT_LIST", "EP1_SYS_MESSENGER", "EP1_SYS_INTERNET")
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/Computer"]
 shape = SubResource("CircleShape2D_spot")
@@ -255,7 +252,6 @@ position = Vector2(500, 470)
 script = ExtResource("2_interactable")
 id = "scheduler"
 label_key = "EP1_OBJ_SCHEDULER"
-description_key = "EP1_SYS_SCHEDULER"
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/Scheduler"]
 shape = SubResource("CircleShape2D_spot")
@@ -271,7 +267,6 @@ position = Vector2(762, 240)
 script = ExtResource("2_interactable")
 id = "frame_a"
 label_key = "EP1_OBJ_FRAME_A"
-description_key = "EP1_SYS_FRAME_A"
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/FrameA"]
 shape = SubResource("CircleShape2D_spot")
@@ -287,7 +282,6 @@ position = Vector2(938, 240)
 script = ExtResource("2_interactable")
 id = "frame_b"
 label_key = "EP1_OBJ_FRAME_B"
-description_key = "EP1_SYS_FRAME_B"
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/FrameB"]
 shape = SubResource("CircleShape2D_spot")
@@ -303,7 +297,6 @@ position = Vector2(700, 796)
 script = ExtResource("2_interactable")
 id = "door"
 label_key = "EP1_OBJ_DOOR"
-description_key = "EP1_SYS_CALL_NEXT"
 
 [node name="Shape" type="CollisionShape2D" parent="Interactables/Door"]
 shape = SubResource("CircleShape2D_spot")

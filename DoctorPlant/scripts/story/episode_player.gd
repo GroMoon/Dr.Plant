@@ -1,22 +1,44 @@
 extends Node2D
 class_name EpisodePlayer
-## 에피소드 진행기. 명령 목록(ep1_script.gd 같은 데이터)을 위에서부터 실행한다.
+## 에피소드 진행기. 대본(.dialogue)을 start 부터 끝까지 실행한다.
+##
+## 대사·선택지는 Dialogue Manager 가 대본에서 한 줄씩 꺼내 주고,
+## 화면 연출(방 전환·카메라·페이드·필드 조작·미니게임)은 대본의
+## `$> stage.명령(...)` 줄이 이 노드의 공개 함수를 부른다(아래 "연출 명령" 절).
 ##
 ## 대사·연출·필드 이동·미니게임이 한 씬 안에서 이어지므로
 ## 장면마다 씬을 따로 만들지 않고 명령으로 전환한다.
-##
-## 명령 종류는 scripts/story/ep1_script.gd 머리말 참조.
 
 const TITLE_SCENE: String = "res://scenes/title_screen.tscn"
 const MINIGAME_SCENE: PackedScene = preload("res://scenes/ch1/minigame_diagnosis.tscn")
 const PLAYER_SCENE: PackedScene = preload("res://scenes/field/field_player.tscn")
 
-const FOLLOW_ZOOM: Vector2 = Vector2(1.6, 1.6)
+## 대본에서 방을 이름으로 부른다: stage.room("clinic")
+const ROOMS: Dictionary = {
+	"lobby": "res://scenes/field/room_lobby.tscn",
+	"clinic": "res://scenes/field/room_clinic.tscn",
+}
+## 대본에서 전면 연출 씬을 이름으로 부른다: stage.view_open("sunbathing", 1.2)
+const VIEWS: Dictionary = {
+	"sunbathing": "res://scenes/ch1/sunbathing_view.tscn",
+}
+## 시간대 색조. 대본에서 stage.tint("morning", 초) 처럼 부른다.
+const TINTS: Dictionary = {
+	"morning": Color(1.0, 0.867, 0.616, 0.18),
+	"afternoon": Color(1.0, 0.816, 0.475, 0.30),
+	"evening": Color(0.184, 0.157, 0.341, 0.38),
+}
+## 필드에서 조사 지점을 조사하면 대본의 이 접두사 + 지점 id 구간을 실행한다.
+const INSPECT_CUE_PREFIX: String = "inspect_"
+
+const FOLLOW_ZOOM: float = 1.6
 
 signal advance_requested
 
-## 이 에피소드가 실행할 명령 목록을 담은 스크립트(COMMANDS 상수를 가진다).
-@export var script_data: Script = null
+## 실행할 대본.
+@export var dialogue: DialogueResource = null
+## 대본에서 처음 실행할 구간.
+@export var start_cue: String = "start"
 ## 저장 슬롯에 기록할 이 씬의 경로.
 @export var scene_path: String = ""
 ## 저장 슬롯에 기록할 챕터 번호.
@@ -46,7 +68,8 @@ var _minigame: Node = null
 var _camera_follow: bool = false
 var _field_active: bool = false
 var _awaiting_advance: bool = false
-var _finished: bool = false
+## 대본에 넘겨주는 상태. 대본에서 `stage.` 으로 이 노드를 부른다.
+var _states: Array = []
 
 
 func _ready() -> void:
@@ -54,6 +77,8 @@ func _ready() -> void:
 	_prompt.hide()
 	_hint.hide()
 	_card.hide()
+	_states = [{"stage": self}]
+	DialogueManager.mutated.connect(_on_dialogue_mutated)
 	StoryState.load_from_slot(SaveSystem.current_slot)
 	StoryState.chapter = chapter
 	AudioManager.stop_bgm()
@@ -94,190 +119,95 @@ func _unhandled_input(event: InputEvent) -> void:
 # ── 실행 ──────────────────────────────────────────────────────────────
 
 func _run() -> void:
-	if script_data == null:
-		push_error("실행할 에피소드 스크립트가 지정되지 않았다.")
+	if dialogue == null:
+		push_error("실행할 대본이 지정되지 않았다.")
 		return
-	var commands: Array = script_data.get_script_constant_map().get("COMMANDS", [])
-	if commands.is_empty():
-		push_error("에피소드 스크립트에 COMMANDS 가 없다: %s" % script_data.resource_path)
-		return
-	for i: int in commands.size():
-		if _finished:
-			break
-		await _exec(commands[i], _peek(commands, i + 1))
+	await _play(start_cue)
 	await _leave()
 
 
-## 바로 다음 명령. 대사가 이어지는지 판단하는 데 쓴다.
-func _peek(commands: Array, index: int) -> Dictionary:
-	if index >= commands.size():
-		return {}
-	return commands[index]
+## 대본의 cue 구간을 끝(=> END)까지 진행한다.
+## 연출 명령은 Dialogue Manager 가 줄을 꺼내는 도중에 실행되고 끝날 때까지 기다린다.
+func _play(cue: String) -> void:
+	var line: DialogueLine = await DialogueManager.get_next_dialogue_line(dialogue, cue, _states)
+	while line != null:
+		var next_id: String = line.next_id
+		if line.responses.is_empty():
+			await _say(line)
+		else:
+			var response: DialogueResponse = await _choose(line)
+			next_id = response.next_id
+		line = await DialogueManager.get_next_dialogue_line(dialogue, next_id, _states)
+	_dialogue.close()
 
 
-## 대사를 이어서 출력하는 명령인지.
-func _is_dialogue(command: Dictionary) -> bool:
-	return String(command.get("t", "")) in ["say", "sys", "notice"]
-
-
-func _exec(command: Dictionary, next_command: Dictionary = {}) -> void:
-	match String(command.get("t", "")):
-		"title":
-			await _show_card(command)
-		"room":
-			await _load_room(command)
-		"tint":
-			await _tint(command)
-		"npc":
-			_set_npc(command)
-		"player":
-			_set_player(command)
-		"enable":
-			_set_interactable_enabled(command)
-		"cam_set":
-			_camera_follow = false
-			_camera.global_position = command.get("at", _camera.global_position)
-			_camera.zoom = command.get("zoom", _camera.zoom)
-		"cam":
-			await _move_camera(command)
-		"cam_follow":
-			_camera_follow = bool(command.get("on", true))
-			if _camera_follow and is_instance_valid(_player):
-				_camera.zoom = command.get("zoom", FOLLOW_ZOOM)
-		"fade":
-			await _do_fade(command)
-		"wait":
-			await _sleep(float(command.get("time", 1.0)))
-		"sfx":
-			AudioManager.play_sfx(StringName(command.get("id", "")))
-		"amb":
-			if bool(command.get("on", true)):
-				AudioManager.start_ambience(
-					StringName(command.get("id", "")), float(command.get("db", -6.0))
-				)
-			else:
-				AudioManager.stop_ambience(StringName(command.get("id", "")))
-		"say":
-			await _say(
-				String(command.get("who", "")), String(command.get("key", "")), _is_dialogue(next_command)
-			)
-		"sys":
-			await _say("CH_SYSTEM", String(command.get("key", "")), _is_dialogue(next_command))
-		"notice":
-			await _say("CH_NOTICE", String(command.get("key", "")), _is_dialogue(next_command))
-		"hide_dialogue":
-			_dialogue.close()
-		"choice":
-			await _choose(command)
-		"minigame":
-			await _run_minigame(command)
-		"field":
-			await _run_field(command)
-		"view":
-			await _open_view(command)
-		"view_close":
-			await _close_view(float(command.get("time", 0.4)))
-		"save":
-			StoryState.checkpoint = String(command.get("checkpoint", ""))
-			StoryState.save_to_slot(scene_path)
-		"flag":
-			StoryState.set_flag(String(command.get("flag", "")), command.get("value", true))
-		"end":
-			await _show_card(command)
-			_finished = true
-		_:
-			push_warning("알 수 없는 명령: %s" % command)
-
-
-# ── 개별 명령 ─────────────────────────────────────────────────────────
-
-func _sleep(seconds: float) -> void:
-	if seconds <= 0.0:
-		return
-	await get_tree().create_timer(seconds).timeout
-
-
-## keep_open 이 false 면 다 읽고 넘어가는 순간 대사창을 닫는다.
-## 대사가 끝났는데 창만 남아 있는 것을 막는다.
-func _say(speaker_key: String, body_key: String, keep_open: bool = false) -> void:
-	if body_key.is_empty():
-		return
-	_dialogue.show_line(speaker_key, body_key)
-	await _wait_advance()
-	if not keep_open:
-		_dialogue.close()
-
-
-func _wait_advance() -> void:
+func _say(line: DialogueLine) -> void:
+	_dialogue.show_line(line)
 	_awaiting_advance = true
 	await advance_requested
 	_awaiting_advance = false
 
 
-func _choose(command: Dictionary) -> void:
-	var options: Array = command.get("options", [])
-	var keys := PackedStringArray()
-	for option: Dictionary in options:
-		keys.append(String(option.get("key", "")))
-	_choices.open(String(command.get("key", "")), keys)
-	var index: int = await _choices.chosen
+func _choose(line: DialogueLine) -> DialogueResponse:
+	_dialogue.close()
+	_choices.open(line)
+	var response: DialogueResponse = await _choices.chosen
 	_choices.close()
-	var picked: Dictionary = options[clampi(index, 0, options.size() - 1)]
-	if picked.has("flag"):
-		StoryState.set_flag(String(picked["flag"]), picked.get("value", true))
-	var follow_ups: Array = picked.get("then", [])
-	for i: int in follow_ups.size():
-		await _exec(follow_ups[i], _peek(follow_ups, i + 1))
+	return response
 
 
-func _do_fade(command: Dictionary) -> void:
-	var target: float = float(command.get("to", 1.0))
-	var time: float = float(command.get("time", 1.0))
-	if time <= 0.0:
-		_fade.color.a = target
-		return
-	var tween := create_tween()
-	tween.tween_property(_fade, "color:a", target, time)
-	await tween.finished
+## 대사 다음에 연출 명령이 오면 대사창을 닫는다.
+## 대사가 끝났는데 창만 남아 있는 것을 막는다.
+func _on_dialogue_mutated(mutation: Dictionary) -> void:
+	if not bool(mutation.get("is_inline", false)):
+		_dialogue.close()
 
 
-func _move_camera(command: Dictionary) -> void:
-	_camera_follow = false
-	var time: float = float(command.get("time", 1.0))
-	var tween := create_tween()
-	tween.set_parallel(true)
-	tween.set_trans(Tween.TRANS_SINE)
-	tween.set_ease(Tween.EASE_IN_OUT)
-	if command.has("to"):
-		tween.tween_property(_camera, "global_position", command["to"], time)
-	if command.has("zoom"):
-		tween.tween_property(_camera, "zoom", command["zoom"], time)
-	await tween.finished
+# ── 연출 명령 ─────────────────────────────────────────────────────────
+# 대본에서 `$> stage.명령(인자)` 로 부른다. 명령이 끝날 때까지 대본 진행이 멈춘다.
+#
+#   card(label, title, sub, 초)         장·에피소드 카드. 인자는 문자열 키, 안 쓰는 칸은 ""
+#   room(방)                            필드 씬 교체. 방 이름은 ROOMS
+#   player_at(위치) / player_hide()     플레이어 세우기(없으면 만든다) / 숨기기
+#   tint(시간대, 초)                    방 전체 색조. 시간대는 TINTS
+#   npc(id, 보임)                       방 안 NPC 표시/숨김
+#   enable(조사지점 id, 켬)             조사 지점 켜고 끄기
+#   cam_set(위치, 줌)                   카메라 즉시 이동
+#   cam_move(위치, 초, 줌=유지)         카메라 이동 연출
+#   cam_follow(켬, 줌)                  카메라가 플레이어를 따라감
+#   fade_in(초) / fade_out(초)          암전 풀기 / 암전
+#   sfx(id)                             효과음
+#   amb_start(id, dB) / amb_stop(id)    반복 환경음
+#   minigame(튜토리얼)                  진찰 미니게임
+#   field(안내 키, 나가는 지점 id)      필드 조작 구간. 조사하면 inspect_<id> 구간 실행
+#   view_open(연출, 초) / view_close(초)  전면 연출 씬. 연출 이름은 VIEWS
+#   save(체크포인트)                    진행 저장
+#
+# 대기는 Dialogue Manager 내장 `$> wait(초)`, 플래그는 `$> StoryState.set_flag(이름, 값)`.
 
-
-func _show_card(command: Dictionary) -> void:
-	_card_label.text = tr(String(command.get("label", "")))
+func card(label_key: String, title_key: String, sub_key: String, time: float = 2.0) -> void:
+	_card_label.text = tr(label_key)
 	_card_label.visible = not _card_label.text.is_empty()
-	_card_title.text = tr(String(command.get("title", "")))
+	_card_title.text = tr(title_key)
 	_card_title.visible = not _card_title.text.is_empty()
-	_card_sub.text = tr(String(command.get("sub", "")))
+	_card_sub.text = tr(sub_key)
 	_card_sub.visible = not _card_sub.text.is_empty()
 	_card.modulate.a = 0.0
 	_card.show()
 	var tween := create_tween()
 	tween.tween_property(_card, "modulate:a", 1.0, 0.6)
 	await tween.finished
-	await _sleep(float(command.get("time", 2.0)))
+	await _sleep(time)
 	var out := create_tween()
 	out.tween_property(_card, "modulate:a", 0.0, 0.6)
 	await out.finished
 	_card.hide()
 
 
-func _load_room(command: Dictionary) -> void:
-	var path: String = String(command.get("path", ""))
+func room(room_id: String) -> void:
+	var path: String = String(ROOMS.get(room_id, ""))
 	if not ResourceLoader.exists(path):
-		push_error("필드 씬을 찾을 수 없다: %s" % path)
+		push_error("필드 씬을 찾을 수 없다: %s" % room_id)
 		return
 	_clear_room()
 	var packed: PackedScene = load(path)
@@ -291,13 +221,200 @@ func _load_room(command: Dictionary) -> void:
 	_camera.limit_top = int(_room.camera_bounds.position.y)
 	_camera.limit_right = int(_room.camera_bounds.end.x)
 	_camera.limit_bottom = int(_room.camera_bounds.end.y)
-	if bool(command.get("player", false)):
-		_spawn_player(command.get("spawn", _room.spawn_point))
-	if command.has("camera"):
-		_camera.global_position = command["camera"]
-	if command.has("zoom"):
-		_camera.zoom = command["zoom"]
 	await _sleep(0.0)
+
+
+func player_at(at: Vector2) -> void:
+	if _player == null:
+		_spawn_player(at)
+		return
+	_player.visible = true
+	_player.global_position = at
+
+
+func player_hide() -> void:
+	if _player != null:
+		_player.visible = false
+
+
+func tint(preset: String, time: float) -> void:
+	if _room == null:
+		return
+	if not TINTS.has(preset):
+		push_error("알 수 없는 색조: %s" % preset)
+		return
+	var node: Node = _room.get_node_or_null("Tint")
+	if not (node is ColorRect):
+		return
+	var rect := node as ColorRect
+	var color: Color = TINTS[preset]
+	if time <= 0.0:
+		rect.modulate = Color.WHITE
+		rect.color = color
+		return
+	rect.color = Color(color.r, color.g, color.b, rect.color.a)
+	var tween := create_tween()
+	tween.tween_property(rect, "color:a", color.a, time)
+	await tween.finished
+
+
+func npc(id: String, shown: bool) -> void:
+	if _room == null:
+		return
+	var holder: Node = _room.get_node_or_null("Npcs")
+	if holder == null:
+		return
+	var target: Node = holder.get_node_or_null(NodePath(id))
+	if target == null:
+		push_warning("NPC 를 찾을 수 없다: %s" % id)
+		return
+	if target is CanvasItem:
+		(target as CanvasItem).visible = shown
+
+
+func enable(id: String, on: bool) -> void:
+	if _room == null:
+		return
+	var target: Interactable = _room.find_interactable(id)
+	if target == null:
+		push_warning("조사 지점을 찾을 수 없다: %s" % id)
+		return
+	target.enabled = on
+
+
+func cam_set(at: Vector2, zoom: float) -> void:
+	_camera_follow = false
+	_camera.global_position = at
+	_camera.zoom = Vector2(zoom, zoom)
+
+
+## zoom 이 0 이하면 줌은 그대로 두고 위치만 옮긴다.
+func cam_move(to: Vector2, time: float, zoom: float = 0.0) -> void:
+	_camera_follow = false
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(_camera, "global_position", to, time)
+	if zoom > 0.0:
+		tween.tween_property(_camera, "zoom", Vector2(zoom, zoom), time)
+	await tween.finished
+
+
+func cam_follow(on: bool, zoom: float = FOLLOW_ZOOM) -> void:
+	_camera_follow = on
+	if _camera_follow and is_instance_valid(_player):
+		_camera.zoom = Vector2(zoom, zoom)
+
+
+func fade_in(time: float) -> void:
+	await _fade_to(0.0, time)
+
+
+func fade_out(time: float) -> void:
+	await _fade_to(1.0, time)
+
+
+func sfx(id: String) -> void:
+	AudioManager.play_sfx(StringName(id))
+
+
+func amb_start(id: String, db: float = -6.0) -> void:
+	AudioManager.start_ambience(StringName(id), db)
+
+
+func amb_stop(id: String) -> void:
+	AudioManager.stop_ambience(StringName(id))
+
+
+func minigame(tutorial: bool) -> void:
+	_dialogue.close()
+	_prompt.hide()
+	_minigame = MINIGAME_SCENE.instantiate()
+	_minigame.set("tutorial", tutorial)
+	_minigame_layer.add_child(_minigame)
+	await _minigame.finished
+	_minigame.queue_free()
+	_minigame = null
+
+
+## 플레이어가 조작하는 구간. exit_id 지점을 조사하면 끝난다.
+func field(hint_key: String, exit_id: String) -> void:
+	if _room == null:
+		push_error("필드 명령인데 방이 없다.")
+		return
+	if _player == null:
+		_spawn_player(_room.spawn_point)
+	_dialogue.close()
+	_player.visible = true
+	_camera_follow = true
+	_camera.zoom = Vector2(FOLLOW_ZOOM, FOLLOW_ZOOM)
+	if not hint_key.is_empty():
+		_hint.text = "%s\n%s" % [tr(hint_key), tr("FIELD_MOVE_HINT")]
+		_hint.show()
+
+	while true:
+		_enable_field(true)
+		var target: Interactable = await _room.interaction_requested
+		_enable_field(false)
+		await _inspect(target)
+		if target.id == exit_id:
+			break
+
+	_hint.hide()
+	_prompt.hide()
+	_dialogue.close()
+	if _player != null:
+		_player.controllable = false
+
+
+func view_open(view_id: String, time: float = 0.8) -> void:
+	var path: String = String(VIEWS.get(view_id, ""))
+	if not ResourceLoader.exists(path):
+		push_error("연출 씬을 찾을 수 없다: %s" % view_id)
+		return
+	await view_close(0.0)
+	_view = (load(path) as PackedScene).instantiate()
+	_view_layer.add_child(_view)
+	if _view is CanvasItem:
+		(_view as CanvasItem).modulate.a = 0.0
+		var tween := create_tween()
+		tween.tween_property(_view, "modulate:a", 1.0, time)
+		await tween.finished
+
+
+func view_close(time: float = 0.4) -> void:
+	if _view == null or not is_instance_valid(_view):
+		_view = null
+		return
+	if time > 0.0 and _view is CanvasItem:
+		var tween := create_tween()
+		tween.tween_property(_view, "modulate:a", 0.0, time)
+		await tween.finished
+	_view.queue_free()
+	_view = null
+
+
+func save(checkpoint: String) -> void:
+	StoryState.checkpoint = checkpoint
+	StoryState.save_to_slot(scene_path)
+
+
+# ── 내부 ──────────────────────────────────────────────────────────────
+
+func _sleep(seconds: float) -> void:
+	if seconds <= 0.0:
+		return
+	await get_tree().create_timer(seconds).timeout
+
+
+func _fade_to(alpha: float, time: float) -> void:
+	if time <= 0.0:
+		_fade.color.a = alpha
+		return
+	var tween := create_tween()
+	tween.tween_property(_fade, "color:a", alpha, time)
+	await tween.finished
 
 
 func _clear_room() -> void:
@@ -320,131 +437,6 @@ func _spawn_player(at: Vector2) -> void:
 	_player.global_position = at
 
 
-func _set_player(command: Dictionary) -> void:
-	if _player == null:
-		if bool(command.get("show", true)) and _room != null:
-			_spawn_player(command.get("at", _room.spawn_point))
-		return
-	_player.visible = bool(command.get("show", true))
-	if command.has("at"):
-		_player.global_position = command["at"]
-
-
-func _set_npc(command: Dictionary) -> void:
-	if _room == null:
-		return
-	var holder: Node = _room.get_node_or_null("Npcs")
-	if holder == null:
-		return
-	var npc: Node = holder.get_node_or_null(NodePath(String(command.get("id", ""))))
-	if npc == null:
-		push_warning("NPC 를 찾을 수 없다: %s" % command.get("id", ""))
-		return
-	if npc is CanvasItem:
-		(npc as CanvasItem).visible = bool(command.get("show", true))
-	if command.has("at") and npc is Node2D:
-		(npc as Node2D).position = command["at"]
-
-
-func _set_interactable_enabled(command: Dictionary) -> void:
-	if _room == null:
-		return
-	var id: String = String(command.get("id", ""))
-	var target: Interactable = _room.find_interactable(id)
-	if target == null:
-		push_warning("조사 지점을 찾을 수 없다: %s" % id)
-		return
-	target.enabled = bool(command.get("on", true))
-
-
-func _tint(command: Dictionary) -> void:
-	if _room == null:
-		return
-	var tint: Node = _room.get_node_or_null("Tint")
-	if not (tint is CanvasItem):
-		return
-	var time: float = float(command.get("time", 1.0))
-	var color: Color = command.get("color", Color(0, 0, 0, 0))
-	if time <= 0.0:
-		(tint as CanvasItem).modulate = Color.WHITE
-		(tint as ColorRect).color = color
-		return
-	(tint as ColorRect).color = Color(color.r, color.g, color.b, (tint as ColorRect).color.a)
-	var tween := create_tween()
-	tween.tween_property(tint, "color:a", color.a, time)
-	await tween.finished
-
-
-func _open_view(command: Dictionary) -> void:
-	var path: String = String(command.get("scene", ""))
-	if not ResourceLoader.exists(path):
-		push_error("연출 씬을 찾을 수 없다: %s" % path)
-		return
-	await _close_view(0.0)
-	_view = (load(path) as PackedScene).instantiate()
-	_view_layer.add_child(_view)
-	if _view is CanvasItem:
-		(_view as CanvasItem).modulate.a = 0.0
-		var tween := create_tween()
-		tween.tween_property(_view, "modulate:a", 1.0, float(command.get("time", 0.8)))
-		await tween.finished
-
-
-func _close_view(time: float) -> void:
-	if _view == null or not is_instance_valid(_view):
-		_view = null
-		return
-	if time > 0.0 and _view is CanvasItem:
-		var tween := create_tween()
-		tween.tween_property(_view, "modulate:a", 0.0, time)
-		await tween.finished
-	_view.queue_free()
-	_view = null
-
-
-func _run_minigame(command: Dictionary) -> void:
-	_dialogue.close()
-	_prompt.hide()
-	_minigame = MINIGAME_SCENE.instantiate()
-	_minigame.set("tutorial", bool(command.get("tutorial", false)))
-	_minigame.set("patient_key", String(command.get("patient", "")))
-	_minigame_layer.add_child(_minigame)
-	await _minigame.finished
-	_minigame.queue_free()
-	_minigame = null
-
-
-func _run_field(command: Dictionary) -> void:
-	if _room == null:
-		push_error("필드 명령인데 방이 없다.")
-		return
-	if _player == null:
-		_spawn_player(command.get("spawn", _room.spawn_point))
-	_dialogue.close()
-	_player.visible = true
-	_camera_follow = true
-	_camera.zoom = command.get("zoom", FOLLOW_ZOOM)
-	var hint_key: String = String(command.get("hint", ""))
-	if not hint_key.is_empty():
-		_hint.text = "%s\n%s" % [tr(hint_key), tr("FIELD_MOVE_HINT")]
-		_hint.show()
-
-	var exits: Array = command.get("exit", [])
-	while true:
-		_enable_field(true)
-		var target: Interactable = await _room.interaction_requested
-		_enable_field(false)
-		await _inspect(target)
-		if exits.has(target.id):
-			break
-
-	_hint.hide()
-	_prompt.hide()
-	_dialogue.close()
-	if _player != null:
-		_player.controllable = false
-
-
 func _enable_field(active: bool) -> void:
 	_field_active = active
 	if _player != null and is_instance_valid(_player):
@@ -457,23 +449,11 @@ func _enable_field(active: bool) -> void:
 		_on_focus_changed(_room.focus())
 
 
-## 조사 지점 하나를 처리한다. 하위 선택지가 있으면 먼저 띄운다.
+## 조사 지점의 대사(대본의 inspect_<id> 구간)를 실행한다. 구간이 없으면 대사 없이 넘어간다.
 func _inspect(target: Interactable) -> void:
-	if target.option_keys.size() > 0:
-		var keys := PackedStringArray(target.option_keys)
-		var descriptions := PackedStringArray(target.option_description_keys)
-		if target.options_closable:
-			keys.append("EP1_OPT_CLOSE")
-		if not target.description_key.is_empty():
-			await _say("CH_SYSTEM", target.description_key)
-		_choices.open(target.label_key, keys)
-		var index: int = await _choices.chosen
-		_choices.close()
-		if index < descriptions.size():
-			await _say("CH_SYSTEM", descriptions[index])
-		return
-	if not target.description_key.is_empty():
-		await _say("CH_SYSTEM", target.description_key)
+	var cue: String = INSPECT_CUE_PREFIX + target.id
+	if dialogue.cues.has(cue):
+		await _play(cue)
 
 
 func _on_interaction_requested(_target: Interactable) -> void:
