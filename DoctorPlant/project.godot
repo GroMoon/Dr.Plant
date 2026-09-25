@@ -28,12 +28,17 @@ GameSettings="*res://scripts/autoload/game_settings.gd"
 SaveSystem="*res://scripts/autoload/save_system.gd"
 StoryState="*res://scripts/autoload/story_state.gd"
 SceneRouter="*res://scripts/autoload/scene_router.gd"
+DialogueManager="*uid://c3rodes2l3gxb"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [gui]
 
@@ -86,6 +91,7 @@ move_down={
 
 [internationalization]
 
+locale/translations_pot_files=PackedStringArray("res://dialogue/ch1/ep1.dialogue")
 locale/fallback="ko"
 
 [rendering]
