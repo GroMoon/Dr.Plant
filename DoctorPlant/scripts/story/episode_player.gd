@@ -10,7 +10,7 @@ class_name EpisodePlayer
 ## 장면마다 씬을 따로 만들지 않고 명령으로 전환한다.
 
 const TITLE_SCENE: String = "res://scenes/title_screen.tscn"
-const MINIGAME_SCENE: PackedScene = preload("res://scenes/ch1/minigame_diagnosis.tscn")
+const MINIGAME_SCENE: PackedScene = preload("res://scenes/minigame/minigame_host.tscn")
 const PLAYER_SCENE: PackedScene = preload("res://scenes/field/field_player.tscn")
 
 ## 대본에서 방을 이름으로 부른다: stage.room("clinic")
@@ -181,7 +181,7 @@ func _on_dialogue_mutated(mutation: Dictionary) -> void:
 #   fade_in(초) / fade_out(초)          암전 풀기 / 암전
 #   sfx(id)                             효과음
 #   amb_start(id, dB) / amb_stop(id)    반복 환경음
-#   minigame(튜토리얼)                  진찰 미니게임
+#   minigame(튜토리얼, 미니게임="")     진찰 미니게임. 미니게임 id 를 비우면 무작위(MinigameHost.GAMES)
 #   field(안내 키, 나가는 지점 id)      필드 조작 구간. 조사하면 inspect_<id> 구간 실행
 #   chatter(켬)                         필드 인물 혼잣말 말풍선. 인물별 대사는 chatter_<노드 이름 소문자>
 #   view_open(연출, 초) / view_close(초)  전면 연출 씬. 연출 이름은 VIEWS
@@ -331,11 +331,12 @@ func amb_stop(id: String) -> void:
 	AudioManager.stop_ambience(StringName(id))
 
 
-func minigame(tutorial: bool) -> void:
+func minigame(tutorial: bool, game_id: String = "") -> void:
 	_dialogue.close()
 	_prompt.hide()
 	_minigame = MINIGAME_SCENE.instantiate()
 	_minigame.set("tutorial", tutorial)
+	_minigame.set("game_id", game_id)
 	_minigame_layer.add_child(_minigame)
 	await _minigame.finished
 	_minigame.queue_free()

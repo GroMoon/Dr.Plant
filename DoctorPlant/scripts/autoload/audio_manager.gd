@@ -14,6 +14,7 @@ const SFX_STEPS_PATH: String = "res://assets/audio/sfx/step_1.mp3"
 const SFX_KNOCK_PATH: String = "res://assets/audio/sfx/knock.wav"
 const SFX_CHIME_PATH: String = "res://assets/audio/sfx/chime.wav"
 const SFX_WINDOW_PATH: String = "res://assets/audio/sfx/window_open.wav"
+const SFX_BUZZ_PATH: String = "res://assets/audio/sfx/buzz.wav"
 const AMB_MURMUR_PATH: String = "res://assets/audio/ambience/murmur.ogg"
 const SFX_TYPING_PATH: String = "res://assets/audio/sfx/typing.wav"
 
@@ -79,6 +80,7 @@ func _ready() -> void:
 		&"knock": _load_or_generate(SFX_KNOCK_PATH, _make_knock()),
 		&"chime": _load_or_generate(SFX_CHIME_PATH, _make_chime()),
 		&"window_open": _load_or_generate(SFX_WINDOW_PATH, _make_whoosh()),
+		&"buzz": _load_or_generate(SFX_BUZZ_PATH, _make_buzz()),
 	}
 
 
@@ -113,7 +115,7 @@ func play_typing(pitch: float = 1.0, volume_db: float = TYPING_VOLUME_DB) -> voi
 	_typing_player.play()
 
 
-## 챕터 연출용 효과음. id: door_open / door_close / knock / chime / window_open
+## 챕터 연출용 효과음. id: door_open / door_close / knock / chime / window_open / buzz
 ## 대사·발소리와 겹칠 수 있어 일회용 플레이어로 재생한다.
 func play_sfx(id: StringName) -> void:
 	var stream: AudioStream = _sfx_table.get(id, null)
@@ -312,6 +314,21 @@ func _make_whoosh() -> AudioStreamWAV:
 		var envelope: float = sin(PI * ratio)
 		smoothed = lerpf(smoothed, rng.randf_range(-1.0, 1.0), 0.08)
 		_write_sample(data, i, smoothed * envelope * 0.25)
+	return _make_wav(data, false, 0, 0)
+
+
+## 미니게임에서 실수했을 때의 낮은 "뿌" 소리.
+func _make_buzz() -> AudioStreamWAV:
+	var duration: float = 0.22
+	var frames: int = int(MIX_RATE * duration)
+	var data := PackedByteArray()
+	data.resize(frames * 2)
+	for i: int in frames:
+		var t: float = float(i) / MIX_RATE
+		var envelope: float = clampf(t / 0.01, 0.0, 1.0) * (1.0 - t / duration)
+		# 사각파에 가까운 거친 소리. 두 음을 살짝 어긋나게 겹쳐 떨리게 한다.
+		var tone: float = signf(sin(TAU * 150.0 * t)) * 0.6 + signf(sin(TAU * 157.0 * t)) * 0.4
+		_write_sample(data, i, tone * envelope * 0.12)
 	return _make_wav(data, false, 0, 0)
 
 

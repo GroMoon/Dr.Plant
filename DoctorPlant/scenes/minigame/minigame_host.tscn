@@ -1,0 +1,145 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/minigame/minigame_host.gd" id="1_host"]
+[ext_resource type="Theme" path="res://ui/theme/menu_theme.tres" id="2_theme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_frame"]
+bg_color = Color(0.078, 0.114, 0.098, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.353, 0.49, 0.4, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="MinigameHost" type="Control"]
+theme = ExtResource("2_theme")
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_host")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.043, 0.067, 0.059, 0.94)
+
+[node name="Header" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+offset_left = 96.0
+offset_top = 32.0
+offset_right = -96.0
+offset_bottom = 268.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Header"]
+theme_type_variation = &"HeaderLabel"
+theme_override_font_sizes/font_size = 38
+text = "MG_HEADER"
+
+[node name="Hint" type="Label" parent="Header"]
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 1)
+theme_override_font_sizes/font_size = 23
+text = "MG_HINT"
+autowrap_mode = 3
+
+[node name="Controls" type="Label" parent="Header"]
+theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.6)
+theme_override_font_sizes/font_size = 20
+text = "MG_CONTROLS"
+autowrap_mode = 3
+
+[node name="Tutorial" type="Label" parent="Header"]
+theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 0.95)
+theme_override_font_sizes/font_size = 20
+text = "MG_TUTORIAL"
+autowrap_mode = 3
+
+[node name="Frame" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -576.0
+offset_top = -266.0
+offset_right = 576.0
+offset_bottom = 406.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_frame")
+
+[node name="Slot" type="Control" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -560.0
+offset_top = -250.0
+offset_right = 560.0
+offset_bottom = 390.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -576.0
+offset_top = 416.0
+offset_right = 576.0
+offset_bottom = 468.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Progress" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 176.0
+offset_top = 416.0
+offset_right = 576.0
+offset_bottom = 468.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.937, 0.729, 0.325, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Stamp" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = 6.0
+offset_right = 320.0
+offset_bottom = 134.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"TitleLabel"
+theme_override_colors/font_color = Color(0.78, 1, 0.74, 1)
+theme_override_colors/font_outline_color = Color(0.043, 0.067, 0.059, 1)
+theme_override_constants/outline_size = 18
+theme_override_font_sizes/font_size = 96
+text = "MG_CLEAR"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -140,7 +140,7 @@ func test_full_run_reaches_end() -> void:
 	assert_eq(spoken[0], "EP1_P1_01")
 	assert_eq(spoken[spoken.size() - 1], "EP1_SYS_TIRED")
 	assert_eq(stage.calls_named("field"), [["EP1_HINT_CLINIC", "door"], ["EP1_HINT_WINDOW", "sun_button"], ["EP1_HINT_EXIT", "exit_door"]])
-	assert_eq(stage.calls_named("minigame"), [[true], [false]])
+	assert_eq(stage.calls_named("minigame"), [[true, ""], [false, ""]])
 	assert_eq(stage.calls_named("chatter"), [[true], [false]])
 	assert_eq(stage.calls_named("save"), [["ep1_s2_clinic"], ["ep1_s2_sunbathing"], ["ep1_s3_evening"]])
 	assert_true(bool(StoryState.get_flag("ep1_prescribed_p1", false)), "환자1 처방 플래그가 저장되지 않았다.")
@@ -242,8 +242,10 @@ class RecordingStage extends EpisodePlayer:
 	func amb_stop(id: String) -> void:
 		calls.append(["amb_stop", id])
 
-	func minigame(tutorial: bool) -> void:
-		calls.append(["minigame", tutorial])
+	func minigame(tutorial: bool, game_id: String = "") -> void:
+		if not game_id.is_empty():
+			assert(not MinigameHost.find_game(game_id).is_empty(), "알 수 없는 미니게임: %s" % game_id)
+		calls.append(["minigame", tutorial, game_id])
 
 	func field(hint_key: String, exit_id: String) -> void:
 		calls.append(["field", hint_key, exit_id])
