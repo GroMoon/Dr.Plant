@@ -208,3 +208,9 @@ func _head_top(figure: Node2D) -> float:
 func _voice_pitch(figure_name: String) -> float:
 	var ratio: float = float(absi(figure_name.hash()) % 1000) / 999.0
 	return lerpf(PITCH_MIN, PITCH_MAX, ratio)
+
+
+## 플레이어와의 거리로 정한 타이핑음 크기 배율(0~1). FULL 안은 1, SILENT 밖은 0.
+func _voice_gain(speaker: Speaker) -> float:
+	var t: float = inverse_lerp(VOICE_FULL_RADIUS, VOICE_SILENT_RADIUS, _distance(speaker))
+	return 1.0 - clampf(t, 0.0, 1.0)
