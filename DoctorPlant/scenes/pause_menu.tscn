@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/pause_menu.gd" id="1_pause"]
 [ext_resource type="PackedScene" path="res://scenes/settings_menu.tscn" id="2_settings"]
 [ext_resource type="PackedScene" path="res://scenes/confirm_popup.tscn" id="3_confirm"]
+[ext_resource type="Theme" path="res://ui/theme/menu_theme.tres" id="menu_theme"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
@@ -10,6 +11,7 @@ layer = 64
 script = ExtResource("1_pause")
 
 [node name="Root" type="Control" parent="."]
+theme = ExtResource("menu_theme")
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -37,6 +39,7 @@ custom_minimum_size = Vector2(420, 0)
 theme_override_constants/separation = 14
 
 [node name="Title" type="Label" parent="Root/Center/Panel/Box"]
+theme_type_variation = &"HeaderLabel"
 theme_override_font_sizes/font_size = 30
 text = "PAUSE_TITLE"
 horizontal_alignment = 1

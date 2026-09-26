@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/confirm_popup.gd" id="1_confirm"]
+[ext_resource type="Theme" path="res://ui/theme/menu_theme.tres" id="menu_theme"]
 
 [node name="ConfirmPopup" type="Control"]
+theme = ExtResource("menu_theme")
 process_mode = 3
 visible = false
 anchor_right = 1.0

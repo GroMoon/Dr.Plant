@@ -43,6 +43,7 @@ visible = false
 visible = false
 
 [node name="InteractPrompt" type="Label" parent="Ui"]
+theme_type_variation = &"UiLabel"
 visible = false
 anchor_left = 0.5
 anchor_top = 1.0
@@ -61,6 +62,7 @@ text = "FIELD_INTERACT_HINT"
 horizontal_alignment = 1
 
 [node name="FieldHint" type="Label" parent="Ui"]
+theme_type_variation = &"UiLabel"
 visible = false
 anchor_right = 1.0
 offset_left = 64.0
@@ -105,17 +107,20 @@ alignment = 1
 theme_override_constants/separation = 18
 
 [node name="CardLabel" type="Label" parent="Ui/Card/Rows"]
+theme_type_variation = &"TitleLabel"
 theme_override_colors/font_color = Color(0.612, 0.827, 0.573, 0.9)
 theme_override_font_sizes/font_size = 26
 text = "EP1_CHAPTER_LABEL"
 horizontal_alignment = 1
 
 [node name="CardTitle" type="Label" parent="Ui/Card/Rows"]
+theme_type_variation = &"TitleLabel"
 theme_override_font_sizes/font_size = 56
 text = "EP1_CHAPTER_TITLE"
 horizontal_alignment = 1
 
 [node name="CardSub" type="Label" parent="Ui/Card/Rows"]
+theme_type_variation = &"TitleLabel"
 theme_override_colors/font_color = Color(0.859, 0.902, 0.831, 0.75)
 theme_override_font_sizes/font_size = 22
 text = "EP1_EPISODE_LABEL"

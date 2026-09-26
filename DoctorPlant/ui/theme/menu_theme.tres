@@ -1,0 +1,18 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontVariation" path="res://ui/theme/fonts/font_ui.tres" id="1_ui"]
+[ext_resource type="FontVariation" path="res://ui/theme/fonts/font_ui_bold.tres" id="2_ui_bold"]
+[ext_resource type="FontVariation" path="res://ui/theme/fonts/font_title.tres" id="3_title"]
+[ext_resource type="FontVariation" path="res://ui/theme/fonts/font_body.tres" id="4_body"]
+
+; default_font 가 있는 테마는 하위 노드의 모든 폰트 조회에 먼저 답하므로,
+; 메뉴 안에서 쓰는 타입 변형은 main_theme 에 있어도 여기에 다시 적어야 한다.
+
+[resource]
+default_font = ExtResource("1_ui")
+DialogueLabel/base_type = &"Label"
+DialogueLabel/fonts/font = ExtResource("4_body")
+HeaderLabel/base_type = &"Label"
+HeaderLabel/fonts/font = ExtResource("2_ui_bold")
+TitleLabel/base_type = &"Label"
+TitleLabel/fonts/font = ExtResource("3_title")

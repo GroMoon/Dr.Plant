@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/title_screen.gd" id="1_title"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/bg_title.png" id="2_bg"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/save_slot_menu.tscn" id="4_slots"]
 [ext_resource type="PackedScene" path="res://scenes/settings_menu.tscn" id="5_settings"]
 [ext_resource type="PackedScene" path="res://scenes/confirm_popup.tscn" id="6_confirm"]
+[ext_resource type="Theme" path="res://ui/theme/menu_theme.tres" id="menu_theme"]
 
 [sub_resource type="Gradient" id="Gradient_vignette"]
 offsets = PackedFloat32Array(0, 1)
@@ -19,6 +20,7 @@ fill_from = Vector2(0, 0)
 fill_to = Vector2(0, 1)
 
 [node name="TitleScreen" type="Control"]
+theme = ExtResource("menu_theme")
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -68,6 +70,7 @@ mouse_filter = 2
 theme_override_constants/separation = 4
 
 [node name="TitleLabel" type="Label" parent="TitleBox"]
+theme_type_variation = &"TitleLabel"
 theme_override_constants/outline_size = 10
 theme_override_font_sizes/font_size = 84
 text = "GAME_TITLE"

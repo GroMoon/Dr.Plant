@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/save_slot_menu.gd" id="1_slots"]
+[ext_resource type="Theme" path="res://ui/theme/menu_theme.tres" id="menu_theme"]
 
 [node name="SaveSlotMenu" type="Control"]
+theme = ExtResource("menu_theme")
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -31,6 +33,7 @@ custom_minimum_size = Vector2(760, 0)
 theme_override_constants/separation = 18
 
 [node name="Title" type="Label" parent="Center/Panel/Box"]
+theme_type_variation = &"HeaderLabel"
 theme_override_font_sizes/font_size = 34
 text = "SLOT_TITLE"
 
