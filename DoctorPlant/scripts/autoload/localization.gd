@@ -3,12 +3,17 @@ extends Node
 ## Translation 리소스를 런타임에 만들어 TranslationServer 에 넣기 때문에
 ## .po/.csv 임포트 없이도 언어 전환이 동작한다.
 
-## 챕터 대사는 분량이 커서 별도 파일로 뺀다. 여기에 모아 한 번에 등록한다.
+## 챕터 문자열은 분량이 커서 별도 파일로 뺀다. 여기에 모아 한 번에 등록한다.
+## 각 테이블은 STRINGS(화면 문구), DIALOGUE(대본 번역), DIALOGUE_PATH(대본 경로)를 가진다.
 const EPISODE_TABLES: Array = [
 	preload("res://scripts/story/ep1_lines.gd"),
 ]
 
+## 대본(.dialogue)을 쓰는 언어이자 기본 언어.
 const DEFAULT_LOCALE: String = "ko"
+
+## Dialogue Manager 는 대사를 tr(키, "dialogue") 로 찾는다. 대본 번역은 이 문맥으로 등록한다.
+const DIALOGUE_CONTEXT: StringName = &"dialogue"
 
 const SUPPORTED_LOCALES: Array[Dictionary] = [
 	{"code": "ko", "label": "한국어"},
@@ -145,15 +150,35 @@ func _register_translations() -> void:
 		translation.locale = locale_code
 		_fill(translation, STRINGS[locale_code])
 		for table: Script in EPISODE_TABLES:
-			var episode_strings: Dictionary = table.get_script_constant_map().get("STRINGS", {})
+			var constants: Dictionary = table.get_script_constant_map()
+			var episode_strings: Dictionary = constants.get("STRINGS", {})
 			if episode_strings.has(locale_code):
 				_fill(translation, episode_strings[locale_code])
+			if locale_code == DEFAULT_LOCALE:
+				_fill_dialogue_source(translation, String(constants.get("DIALOGUE_PATH", "")))
+			else:
+				var dialogue_strings: Dictionary = constants.get("DIALOGUE", {})
+				_fill(translation, dialogue_strings.get(locale_code, {}), DIALOGUE_CONTEXT)
 		TranslationServer.add_translation(translation)
 
 
-func _fill(translation: Translation, table: Dictionary) -> void:
+func _fill(translation: Translation, table: Dictionary, context: StringName = &"") -> void:
 	for key: String in table.keys():
-		translation.add_message(key, table[key])
+		translation.add_message(key, table[key], context)
+
+
+## 대본 원문을 기본 언어 번역으로 등록한다.
+## [ID:키] 가 붙은 대사는 키로 찾기 때문에, 원문 언어에도 키 → 원문 항목이 있어야 한다.
+func _fill_dialogue_source(translation: Translation, path: String) -> void:
+	if path.is_empty():
+		return
+	if not ResourceLoader.exists(path):
+		push_error("대본을 찾을 수 없다: %s" % path)
+		return
+	var dialogue: DialogueResource = load(path)
+	for line: Dictionary in dialogue.lines.values():
+		if line.has("static_id"):
+			translation.add_message(line["static_id"], line.get("text", ""), DIALOGUE_CONTEXT)
 
 
 func locale_label(code: String) -> String:

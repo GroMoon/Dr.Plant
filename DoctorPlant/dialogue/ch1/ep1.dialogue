@@ -1,0 +1,254 @@
+# 챕터 1 / 1화 대본. episode_player.gd 가 ~ start 부터 실행한다.
+# 원문: design/requirements/ch1/03-ep1-script.md
+#
+# ── 쓰는 법 ──────────────────────────────────────────────────────────
+#   화자: 대사 [ID:키]          대사 한 줄. 키는 번역에 쓰이며 프로젝트 전체에서 겹치면 안 된다.
+#   - 선택지 [ID:키]            바로 윗줄 대사가 선택지 창의 질문이 된다.
+#   $> stage.명령(...)          화면 연출. 명령 목록은 scripts/story/episode_player.gd "연출 명령" 절.
+#   $> wait(초)                 대기.
+#   $> StoryState.set_flag(이름, 값)   선택 결과 저장.
+#   =>< 이름                    ~ 이름 구간을 실행하고 돌아온다.
+#   ~ inspect_<조사지점 id>     필드에서 그 지점을 조사하면 실행된다. 없으면 대사 없이 넘어간다.
+#
+# 연출 명령이 나오면 떠 있던 대사창은 자동으로 닫힌다.
+# 한국어 원문을 고치면 영어 번역(scripts/story/ep1_lines.gd 의 DIALOGUE)도 함께 확인한다.
+
+~ start
+
+# ══════════════════════════════════════════════════════════════════════
+# 장면 1 : 병원 내부(오전) / 애니메이션
+# ══════════════════════════════════════════════════════════════════════
+$> stage.card("EP1_CHAPTER_LABEL", "EP1_CHAPTER_TITLE", "EP1_EPISODE_LABEL", 2.4)
+$> stage.room("lobby")
+$> stage.tint("morning", 0.0)
+$> stage.cam_set(Vector2(600, 450), 1.6)
+$> stage.amb_start("murmur", -16.0)
+$> stage.fade_in(2.0)
+
+# 왼쪽에서 오른쪽으로 천천히 슬라이드하며 전체 배경을 보여준다.
+$> stage.cam_move(Vector2(1800, 450), 9.0)
+
+# 걸어다니는 식물들의 신발 클로즈업 + 발소리.
+$> stage.amb_start("steps", -8.0)
+$> stage.cam_move(Vector2(1480, 620), 2.6, 3.4)
+$> wait(2.2)
+$> stage.amb_stop("steps")
+
+# 똑똑. 노크 뒤에 문이 열리는 소리와 함께 페이드 아웃.
+$> stage.sfx("knock")
+$> wait(1.4)
+$> stage.sfx("door_open")
+$> stage.fade_out(1.8)
+$> stage.amb_stop("murmur")
+$> wait(0.8)
+
+# ══════════════════════════════════════════════════════════════════════
+# 장면 2 : 진료실
+# ══════════════════════════════════════════════════════════════════════
+$> stage.room("clinic")
+$> stage.player_at(Vector2(700, 620))
+$> stage.tint("morning", 0.0)
+$> stage.cam_set(Vector2(700, 450), 1.6)
+$> stage.enable("sun_button", false)
+$> stage.npc("Patient", true)
+$> stage.fade_in(1.2)
+
+# ── 환자1 ─────────────────────────────────────────────────────────────
+환자1: 안녕하세요, 선생님. [ID:EP1_P1_01]
+환자1: 엊그제부터 두통이 좀 있었는데, 그래서 그런지 입맛도 없는 것 같아요. [ID:EP1_P1_02]
+환자1: 아, 어느쪽이 더 아픈지요? [ID:EP1_P1_03]
+환자1: …음, 머리 옆쪽이면서 왼쪽으로 아픈 것 같아요. [ID:EP1_P1_04]
+환자1: 그러니까… 웅웅 울리기도 하고, 누군가 두들기는 것 같기도 하고… [ID:EP1_P1_05]
+
+# (미니게임 화면으로 전환, 튜토리얼 진행)
+$> stage.minigame(true)
+
+SYSTEM: 약을 처방해줄까? [ID:EP1_P1_PRESCRIBE_Q]
+- 처방한다 [ID:EP1_P1_PRESCRIBE_YES]
+	$> StoryState.set_flag("ep1_prescribed_p1", true)
+- 처방하지 않는다 [ID:EP1_P1_PRESCRIBE_NO]
+	$> StoryState.set_flag("ep1_prescribed_p1", false)
+환자1: 오늘도 감사해요, 선생님! [ID:EP1_P1_06]
+=>< patient_leaves
+$> wait(0.6)
+$> stage.save("ep1_s2_clinic")
+
+# ── 진료실 둘러보기 (컴퓨터 / 액자A / 액자B / 스케줄러 / 문) ──────────
+# 조사 대사는 아래 inspect_* 구간. 문을 조사하면 다음 환자로 넘어간다.
+$> stage.field("EP1_HINT_CLINIC", "door")
+
+# ── 환자2 ─────────────────────────────────────────────────────────────
+$> stage.npc("Patient", true)
+$> stage.cam_set(Vector2(700, 450), 1.6)
+환자2: 지난번에 울렁거린다고 말씀드렸던 거, 많이 좋아졌어요~ 아직은 약이 필요해서, 처방받고 싶어요. [ID:EP1_P2_01]
+SYSTEM: 약을 처방하기 전에는 진료과정이 꼭 필요합니다. [ID:EP1_SYS_NEED_EXAM]
+$> stage.minigame(false)
+
+SYSTEM: 약을 처방해줄까? [ID:EP1_P2_PRESCRIBE_Q]
+- 처방한다 [ID:EP1_P2_PRESCRIBE_YES]
+	$> StoryState.set_flag("ep1_prescribed_p2", true)
+- 처방하지 않는다 [ID:EP1_P2_PRESCRIBE_NO]
+	$> StoryState.set_flag("ep1_prescribed_p2", false)
+환자2: 네~ 고맙습니다. [ID:EP1_P2_02]
+=>< patient_leaves
+
+# ── 검은 화면 유지 → 알림음 ───────────────────────────────────────────
+$> stage.fade_out(1.2)
+$> wait(2.0)
+$> stage.sfx("chime")
+$> wait(1.0)
+알림: 해바라기 10분 전입니다. [ID:EP1_NOTICE_SUNBATH]
+$> stage.fade_in(1.4)
+
+# ── 14시. 해바라기 ────────────────────────────────────────────────────
+$> stage.tint("afternoon", 2.0)
+SYSTEM: 14시. 진료실 내부로 들어오는 햇빛이 강해진다. 창문을 열고 햇빛을 만끽하고 싶어진다. [ID:EP1_SYS_AFTERNOON]
+$> stage.enable("door", false)
+$> stage.enable("sun_button", true)
+$> stage.save("ep1_s2_sunbathing")
+$> stage.field("EP1_HINT_WINDOW", "sun_button")
+
+$> stage.sfx("window_open")
+$> stage.view_open("sunbathing", 1.2)
+SYSTEM: 창밖에는 다양한 식물들이 햇볕을 쬐려고 창밖으로 얼굴을 내밀거나, 건물 밖으로 나와 있다. [ID:EP1_SYS_OUTSIDE_1]
+SYSTEM: 하나같이 태양을 보며 가만히 서 있다. 따스한 햇빛과 대비되게, 도시는 숨죽이듯 멈춰 있다. [ID:EP1_SYS_OUTSIDE_2]
+SYSTEM: 모든 식물들은 매일 같은 시간에 햇빛을 쬐어야 합니다. [ID:EP1_SYS_SUNBATH_1]
+SYSTEM: 이 과정을 '해바라기'라고 합니다. [ID:EP1_SYS_SUNBATH_2]
+SYSTEM: 따스한 기운이 충만해진다. [ID:EP1_SYS_SUNBATH_3]
+$> stage.fade_out(1.8)
+$> stage.view_close(0.0)
+$> wait(0.8)
+
+# ══════════════════════════════════════════════════════════════════════
+# 장면 3 : 병원 내부(저녁)
+# ══════════════════════════════════════════════════════════════════════
+$> stage.room("lobby")
+$> stage.player_at(Vector2(1180, 640))
+$> stage.tint("evening", 0.0)
+$> stage.cam_set(Vector2(1180, 450), 1.6)
+$> stage.npc("Staff1", true)
+$> stage.npc("Staff2", true)
+$> stage.fade_in(1.4)
+$> stage.save("ep1_s3_evening")
+
+직원1: 내일 얼마나 바쁘려고 오늘 이렇게 한가했대요? [ID:EP1_STAFF1_01]
+직원1: 어우, 마음의 준비하고 내일 봬요~ 원장님. [ID:EP1_STAFF1_02]
+직원2: 수고하셨어요~ [ID:EP1_STAFF2_01]
+
+# 대화창에서 플레이화면으로 전환. 문 밖으로 나가려고 하면 페이드 아웃.
+# 로비 인물에게 다가가면 말풍선으로 중얼거린다(아래 chatter_* 구간).
+$> stage.chatter(true)
+$> stage.field("EP1_HINT_EXIT", "exit_door")
+$> stage.chatter(false)
+$> stage.sfx("door_open")
+SYSTEM: 피로가 몰려온다. [ID:EP1_SYS_TIRED]
+$> stage.fade_out(2.2)
+$> stage.card("", "EP1_END", "", 2.4)
+=> END
+
+# ══════════════════════════════════════════════════════════════════════
+# 공용 구간
+# ══════════════════════════════════════════════════════════════════════
+
+# 걸어 나가는 발소리 뒤에, 문이 열리고 닫히는 소리.
+~ patient_leaves
+$> stage.npc("Patient", false)
+$> stage.amb_start("steps", -10.0)
+$> wait(1.6)
+$> stage.amb_stop("steps")
+$> stage.sfx("door_open")
+$> wait(0.9)
+$> stage.sfx("door_close")
+=> END
+
+# ══════════════════════════════════════════════════════════════════════
+# 조사 대사 (진료실)
+# ══════════════════════════════════════════════════════════════════════
+
+~ inspect_computer
+SYSTEM: 진료실 컴퓨터. 화면에 몇 가지 항목이 떠 있다. [ID:EP1_SYS_COMPUTER]
+- TODAY 환자 리스트 [ID:EP1_OPT_PATIENT_LIST]
+	SYSTEM: TODAY 환자 리스트. 오늘 예약된 이름들이 줄지어 있다. (세부 내용 미정) [ID:EP1_SYS_PATIENT_LIST]
+- 원내 메신저 [ID:EP1_OPT_MESSENGER]
+	SYSTEM: 원내 메신저. 읽지 않은 대화는 없다. (세부 내용 미정) [ID:EP1_SYS_MESSENGER]
+- 인터넷 [ID:EP1_OPT_INTERNET]
+	SYSTEM: 인터넷. 딱히 찾아볼 것이 떠오르지 않는다. (세부 내용 미정) [ID:EP1_SYS_INTERNET]
+- 닫는다 [ID:EP1_OPT_CLOSE]
+=> END
+
+~ inspect_frame_a
+SYSTEM: 액자 A. 의사 면허증이 걸려 있다. [ID:EP1_SYS_FRAME_A]
+=> END
+
+~ inspect_frame_b
+SYSTEM: 액자 B. 식물 해부도가 걸려 있다. [ID:EP1_SYS_FRAME_B]
+=> END
+
+~ inspect_scheduler
+SYSTEM: 오늘 스케줄을 확인했다. 오후 2시마다 '해바라기'라고 적혀 있다. [ID:EP1_SYS_SCHEDULER]
+=> END
+
+~ inspect_door
+SYSTEM: 다음 환자를 호출했다. [ID:EP1_SYS_CALL_NEXT]
+=> END
+
+# ══════════════════════════════════════════════════════════════════════
+# 말풍선 혼잣말 (장면 3 저녁 로비)
+# ══════════════════════════════════════════════════════════════════════
+# 필드에서 인물에게 다가가면 머리 위 말풍선으로 한 줄씩 중얼거린다.
+# 대사창을 띄우지 않고 조작도 막지 않는다. 곁에 서 있으면 다음 줄로 이어지고, 다 말하면 잠시 쉬었다가 처음부터.
+# 구간 이름은 chatter_<방 씬 Npcs·Crowd 아래 노드 이름 소문자>. 화자는 쓰지 않는다.
+# ※ 기획 문서에 없는 임시 대사다. 기획이 정해지면 이 구간만 고치면 된다.
+
+~ chatter_staff1
+내일 예약 명단 보셨어요? 어휴, 벌써 빼곡해요. [ID:EP1_CHAT_STAFF1_01]
+오늘 해바라기 때 햇빛 진짜 좋았죠~ [ID:EP1_CHAT_STAFF1_02]
+원장님도 얼른 들어가서 쉬세요! [ID:EP1_CHAT_STAFF1_03]
+=> END
+
+~ chatter_staff2
+화분 물은 제가 다 줬어요. [ID:EP1_CHAT_STAFF2_01]
+흐아암… 오늘따라 잎이 무겁네. [ID:EP1_CHAT_STAFF2_02]
+=> END
+
+~ chatter_seated1
+선생님 약은 참 잘 들어… [ID:EP1_CHAT_SEATED1_01]
+내일도 와야지. 모레도. [ID:EP1_CHAT_SEATED1_02]
+=> END
+
+~ chatter_seated2
+…… [ID:EP1_CHAT_SEATED2_01]
+=> END
+
+~ chatter_seated3
+요즘 잎 끝이 자꾸 말려요. [ID:EP1_CHAT_SEATED3_01]
+옆 도시에 이상한 병이 돈다던데… [ID:EP1_CHAT_SEATED3_02]
+=> END
+
+~ chatter_seated4
+해바라기 시간이 조금만 더 길었으면. [ID:EP1_CHAT_SEATED4_01]
+해가 벌써 졌네… [ID:EP1_CHAT_SEATED4_02]
+=> END
+
+~ chatter_seated5
+웅… 웅… [ID:EP1_CHAT_SEATED5_01]
+=> END
+
+~ chatter_seated6
+괜히 불안해… 괜히… [ID:EP1_CHAT_SEATED6_01]
+아니야, 괜찮을 거야. 선생님이 계시잖아. [ID:EP1_CHAT_SEATED6_02]
+=> END
+
+~ chatter_walker1
+신발 끈이 또 풀렸네. [ID:EP1_CHAT_WALKER1_01]
+이 병원 소파는 참 폭신해. [ID:EP1_CHAT_WALKER1_02]
+=> END
+
+~ chatter_walker2
+…… [ID:EP1_CHAT_WALKER2_01]
+=> END
+
+~ chatter_walker3
+물 마실 시간인데… [ID:EP1_CHAT_WALKER3_01]
+저분이 원장님이래. 저분이. [ID:EP1_CHAT_WALKER3_02]
+=> END

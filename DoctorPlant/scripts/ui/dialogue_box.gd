@@ -1,23 +1,23 @@
 extends Control
 class_name DialogueBox
 ## 비주얼 노벨 대사창. 화자 이름 + 본문 + 진행 화살표.
-## 본문은 DialogueLabel 이라 설정의 텍스트 속도·크기가 그대로 적용된다.
+## Dialogue Manager 가 돌려준 대사 한 줄(DialogueLine)을 보여준다.
+## 본문은 TypingLabel 이라 설정의 텍스트 속도·크기가 그대로 적용된다.
 
 signal line_finished
 
-## 화자 종류별 이름표 색. SYSTEM·알림은 대사와 구분되게 보여준다.
+## 화자별 이름표 색. SYSTEM·알림은 대사와 구분되게 보여준다. 키는 대본에 쓴 화자 이름.
 const SPEAKER_COLORS: Dictionary = {
-	"CH_SYSTEM": Color(0.612, 0.827, 0.573),
-	"CH_NOTICE": Color(0.898, 0.804, 0.475),
+	"SYSTEM": Color(0.612, 0.827, 0.573),
+	"알림": Color(0.898, 0.804, 0.475),
 }
 const SPEAKER_COLOR_DEFAULT: Color = Color(0.945, 0.957, 0.898)
 
 @onready var _speaker: Label = $Box/Margin/Rows/Speaker
-@onready var _body: DialogueLabel = $Box/Margin/Rows/Body
+@onready var _body: TypingLabel = $Box/Margin/Rows/Body
 @onready var _arrow: Label = $Arrow
 
-var _speaker_key: String = ""
-var _body_key: String = ""
+var _line: DialogueLine = null
 
 
 func _ready() -> void:
@@ -27,10 +27,9 @@ func _ready() -> void:
 	hide()
 
 
-## speaker_key 가 비면 이름표를 숨긴다(나레이션).
-func show_line(speaker_key: String, body_key: String) -> void:
-	_speaker_key = speaker_key
-	_body_key = body_key
+## 화자가 비어 있으면 이름표를 숨긴다(나레이션).
+func show_line(line: DialogueLine) -> void:
+	_line = line
 	show()
 	_arrow.visible = false
 	_render()
@@ -46,20 +45,20 @@ func skip() -> bool:
 
 
 func close() -> void:
-	_speaker_key = ""
-	_body_key = ""
+	_line = null
 	_arrow.visible = false
 	hide()
 
 
 func _render() -> void:
-	_speaker.visible = not _speaker_key.is_empty()
+	var speaker: String = _line.character
+	_speaker.visible = not speaker.is_empty()
 	if _speaker.visible:
-		_speaker.text = tr(_speaker_key)
+		_speaker.text = tr(speaker, Localization.DIALOGUE_CONTEXT)
 		_speaker.add_theme_color_override(
-			"font_color", SPEAKER_COLORS.get(_speaker_key, SPEAKER_COLOR_DEFAULT)
+			"font_color", SPEAKER_COLORS.get(speaker, SPEAKER_COLOR_DEFAULT)
 		)
-	_body.show_line(tr(_body_key))
+	_body.show_line(_line.text)
 
 
 func _on_line_finished() -> void:
@@ -69,5 +68,7 @@ func _on_line_finished() -> void:
 
 func _on_settings_changed() -> void:
 	# 언어를 바꾸면 화면에 떠 있는 대사도 새 언어로 다시 찍는다.
-	if visible and not _body_key.is_empty():
+	# 대사 안의 {{변수}} 치환은 다시 하지 않는다(지금 대본에는 쓰지 않음).
+	if visible and _line != null:
+		_line.text = tr(_line.static_id, Localization.DIALOGUE_CONTEXT)
 		_render()

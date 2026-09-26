@@ -14,7 +14,7 @@ signal closed
 @onready var _text_speed_slider: HSlider = $Center/Panel/Box/Grid/TextSpeedSlider
 @onready var _text_speed_value: Label = $Center/Panel/Box/Grid/TextSpeedValue
 @onready var _text_size_option: OptionButton = $Center/Panel/Box/Grid/TextSizeOption
-@onready var _preview: DialogueLabel = $Center/Panel/Box/PreviewBox/Preview
+@onready var _preview: TypingLabel = $Center/Panel/Box/PreviewBox/Preview
 @onready var _reset_button: Button = $Center/Panel/Box/Buttons/ResetButton
 @onready var _close_button: Button = $Center/Panel/Box/Buttons/CloseButton
 

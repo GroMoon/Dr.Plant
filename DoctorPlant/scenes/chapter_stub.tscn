@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/chapter_stub.gd" id="1_stub"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/bg_title-dark.png" id="2_bg"]
-[ext_resource type="Script" path="res://scripts/ui/dialogue_label.gd" id="3_dialogue"]
+[ext_resource type="Script" path="res://scripts/ui/typing_label.gd" id="3_dialogue"]
 [ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="4_pause"]
 
 [node name="ChapterStub" type="Control"]

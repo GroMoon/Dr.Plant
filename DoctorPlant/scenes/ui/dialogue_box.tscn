@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/dialogue_box.gd" id="1_box"]
-[ext_resource type="Script" path="res://scripts/ui/dialogue_label.gd" id="2_label"]
+[ext_resource type="Script" path="res://scripts/ui/typing_label.gd" id="2_label"]
 
 [node name="DialogueBox" type="Control"]
 anchor_right = 1.0
@@ -37,7 +37,7 @@ theme_override_constants/separation = 10
 [node name="Speaker" type="Label" parent="Box/Margin/Rows"]
 theme_override_colors/font_color = Color(0.945, 0.957, 0.898, 1)
 theme_override_font_sizes/font_size = 24
-text = "CH_SYSTEM"
+text = "SYSTEM"
 
 [node name="Body" type="Label" parent="Box/Margin/Rows"]
 size_flags_vertical = 3

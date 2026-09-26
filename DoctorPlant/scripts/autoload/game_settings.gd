@@ -158,7 +158,7 @@ func apply_locale() -> void:
 	TranslationServer.set_locale(locale)
 
 
-## 텍스트 크기는 UI 전체가 아니라 대사 텍스트(DialogueLabel)에만 적용한다.
+## 텍스트 크기는 UI 전체가 아니라 대사 텍스트(TypingLabel)에만 적용한다.
 ## 메뉴 레이아웃이 글자 크기에 따라 흔들리는 것을 막기 위함이다.
 func apply_text() -> void:
 	text_size_changed.emit(text_size())

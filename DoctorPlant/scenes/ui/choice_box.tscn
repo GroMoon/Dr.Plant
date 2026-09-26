@@ -33,7 +33,7 @@ theme_override_constants/separation = 16
 
 [node name="Prompt" type="Label" parent="Center/Panel/Rows"]
 theme_override_font_sizes/font_size = 26
-text = "EP1_SYS_PRESCRIBE"
+text = "약을 처방해줄까?"
 horizontal_alignment = 1
 autowrap_mode = 3
 

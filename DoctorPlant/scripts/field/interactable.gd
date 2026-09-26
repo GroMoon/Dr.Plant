@@ -2,21 +2,15 @@ extends Area2D
 class_name Interactable
 ## 필드에서 조사할 수 있는 지점. 다가가서 진행 입력(스페이스·클릭·패드 A)을 누르거나
 ## 마우스로 직접 눌러도 동작한다.
+##
+## 조사했을 때의 대사·선택지는 에피소드 대본의 "~ inspect_<id>" 구간에 쓴다.
 
 signal interacted(source: Interactable)
 
-## 에피소드 스크립트가 구분에 쓰는 이름.
+## 대본이 구분에 쓰는 이름. 조사 대사는 대본의 inspect_<id> 구간.
 @export var id: String = ""
 ## 화면에 뜨는 이름표 키.
 @export var label_key: String = ""
-## 조사했을 때 SYSTEM 으로 읽어줄 문장 키. 비면 아무 문장도 읽지 않는다.
-@export var description_key: String = ""
-## 하위 선택지(예: 컴퓨터의 환자 리스트/메신저/인터넷). 비면 선택지를 띄우지 않는다.
-@export var option_keys: PackedStringArray = PackedStringArray()
-## option_keys 와 같은 순서의 설명 문장 키.
-@export var option_description_keys: PackedStringArray = PackedStringArray()
-## 켜면 하위 선택지 끝에 "닫는다"가 붙는다.
-@export var options_closable: bool = true
 ## 꺼진 지점은 화면에서도 사라지고 조사할 수 없다.
 @export var enabled: bool = true:
 	set(value):
